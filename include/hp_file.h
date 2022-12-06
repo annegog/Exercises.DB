@@ -2,11 +2,12 @@
 #define HP_FILE_H
 #include <record.h>
 
-
+#define HP_ERROR -1
 
 /* Η δομή HP_info κρατάει μεταδεδομένα που σχετίζονται με το αρχείο σωρού*/
 typedef struct {
     // Να το συμπληρώσετε
+    char* fileType[10];
 } HP_info;
 
 /*Η συνάρτηση HP_CreateFile χρησιμοποιείται για τη δημιουργία και

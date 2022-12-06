@@ -16,13 +16,28 @@
 }
 
 int HP_CreateFile(char *fileName){
-  geia soy anna
-  blaaa
-  bliiiiiiiii
+  int fd;
+  void* data;
+  BF_Block *block;
+  BF_Block_Init(&block);
+
+  HP_info info;
+  memcpy(info.fileType, "heap", strlen("heap")+1);
+
+  CALL_BF(BF_CreateFile(fileName));
+  CALL_BF(BF_OpenFile(fileName, &fd));
 
 
   
-    return 0;
+  CALL_BF(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
+  data = BF_Block_GetData(block);  
+  memcpy(data, &info, 10);
+
+  BF_Block_SetDirty(block);
+  CALL_BF(BF_UnpinBlock(block));
+  CALL_BF(BF_CloseFile(fd));               //Κλείσιμο αρχείου και αποδέσμευση μνήμης
+  CALL_BF(BF_Close());
+  return 0;
 }
 
 HP_info* HP_OpenFile(char *fileName){
