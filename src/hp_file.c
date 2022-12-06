@@ -26,12 +26,10 @@ int HP_CreateFile(char *fileName){
 
   CALL_BF(BF_CreateFile(fileName));
   CALL_BF(BF_OpenFile(fileName, &fd));
-
-
   
   CALL_BF(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
   data = BF_Block_GetData(block);  
-  memcpy(data, &info, 10);
+  memcpy(data, &info, 5);
 
   BF_Block_SetDirty(block);
   CALL_BF(BF_UnpinBlock(block));
@@ -41,7 +39,22 @@ int HP_CreateFile(char *fileName){
 }
 
 HP_info* HP_OpenFile(char *fileName){
-    return NULL ;
+  int fd;
+  void* data;
+  BF_Block *block;
+  BF_Block_Init(&block);
+  HP_info info;
+  // επίσης εδω θέλει να γυρνάμε NULL αρα μήπως να μην χρησιμοποιουμε την CALL_BF?
+  CALL_BF(BF_OpenFile(fileName, &fd))
+  data = BF_Block_GetData(block);  // λογικα εδω παίρνει το 1ο block
+  memcpy(&info, data, 5); //εδω διαβαζει απο το data και τα βαζει στο struct info
+  
+  if(strcmp(info.fileType, "heap")==0) // αν είναι ίδια
+  {
+    return &info;
+  } 
+  
+  return NULL ;// αν δεν είναι γυρνάει NULL
 }
 
 
