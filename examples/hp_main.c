@@ -21,7 +21,9 @@ int main() {
   BF_Init(LRU);
 
   HP_CreateFile(FILE_NAME);
+  printf("no error so far 1\n");
   HP_info* info = HP_OpenFile(FILE_NAME);
+  printf("no error so far 1\n");
 /*
   Record record;
   srand(12569874);
@@ -39,5 +41,5 @@ int main() {
 
   HP_CloseFile(info);
   */
-  BF_Close();
+  //BF_Close();
 }
