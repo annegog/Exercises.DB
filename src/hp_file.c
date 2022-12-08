@@ -15,14 +15,14 @@
   }                         \
 }
 
-#define CALL_BF_NULL(call)       \
-{                           \
-  BF_ErrorCode code = call; \
-  if (code != BF_OK) {         \
-    BF_PrintError(code);    \
-    return NULL;        \
-  }                         \
-}
+// #define CALL_BF_NULL(call)       \
+// {                           \
+//   BF_ErrorCode code = call; \
+//   if (code != BF_OK) {         \
+//     BF_PrintError(code);    \
+//     return NULL;        \
+//   }                         \
+// }
 
 int HP_CreateFile(char *fileName){
   int fd;
@@ -32,18 +32,20 @@ int HP_CreateFile(char *fileName){
 
   HP_info info;
   memcpy(info.fileType, "heap", strlen("heap")+1);
+  info.fileDesc = fd;
+  printf(">> fd %d\n",fd);
 
-  CALL_BF(BF_CreateFile(fileName));
-  CALL_BF(BF_OpenFile(fileName, &fd));
+  CALL_BF_NUM(BF_CreateFile(fileName));
+  CALL_BF_NUM(BF_OpenFile(fileName, &fd));
   
-  CALL_BF(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
+  CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
   data = BF_Block_GetData(block);  
-  memcpy(data, &info, 5);
-
+  memcpy(data, &info, 5+sizeof(fd));
   BF_Block_SetDirty(block);
-  CALL_BF(BF_UnpinBlock(block));
-  CALL_BF(BF_CloseFile(fd));               //Κλείσιμο αρχείου και αποδέσμευση μνήμης
-  CALL_BF(BF_Close());
+  CALL_BF_NUM(BF_UnpinBlock(block));
+  CALL_BF_NUM(BF_CloseFile(fd)); //Κλείσιμο αρχείου και αποδέσμευση μνήμης
+  CALL_BF_NUM(BF_Close());
+  //BF_Block_Destroy(&block); 
   return 0;
 }
 
@@ -52,11 +54,16 @@ HP_info* HP_OpenFile(char *fileName){
   void* data;
   BF_Block *block;
   BF_Block_Init(&block);
-  CALL_BF_NULL(BF_OpenFile(fileName, &fd));
-  CALL_BF_NULL(BF_GetBlock(fd, 0, block)); // λογικα εδω παίρνει το 1ο block
+  printf("Open the file\n");
+  BF_OpenFile(fileName, &fd);
+  printf("Get Block\n");
+  if(BF_GetBlock(fd, 0, block) != BF_OK) // λογικα εδω παίρνει το 1ο block
+    printf("AAAAA \n");
+  printf("get data\n");
   data = BF_Block_GetData(block);  
   HP_info *info=data;
-  printf("no error so far 2\n");
+  printf("type %s\n", info->fileType);
+  printf("fd %d\n",info->fileDesc);
   if(strcmp(info->fileType, "heap")==0) // αν είναι ίδια
     {
       printf("bhke mesa!!!!\n");
@@ -68,7 +75,7 @@ HP_info* HP_OpenFile(char *fileName){
 
 
 int HP_CloseFile( HP_info* hp_info ){
-    return 0;
+
 }
 
 int HP_InsertEntry(HP_info* hp_info, Record record){

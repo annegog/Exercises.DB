@@ -8,7 +8,12 @@ typedef struct {
     // Να το συμπληρώσετε
     char fileType[5]; //4 γιατι θα κρατάμε heap/hash
     // δεν ξέρω μήπως θελει 5 και για το '\0'
+    int fileDesc;
 } HP_info;
+
+typedef struct {
+    
+} HP_block_info;
 
 /*Η συνάρτηση HP_CreateFile χρησιμοποιείται για τη δημιουργία και
 κατάλληλη αρχικοποίηση ενός άδειου αρχείου σωρού με όνομα fileName.
