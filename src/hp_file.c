@@ -68,7 +68,7 @@ HP_info* HP_OpenFile(char *fileName){
   BF_GetBlockCounter(fd, &blocks_num);
   printf("Number of blocks: %d\n", blocks_num); //εμφανίζει πόσα μπλοκ έχουμε
 
-  BF_PrintError(BF_GetBlock(fd, blocks_num-1, block)); // απλα για να μην εχουμε το 0
+  BF_GetBlock(fd, blocks_num-1, block); // απλα για να μην εχουμε το 0
 
   data = BF_Block_GetData(block);
   HP_info *info = data;
