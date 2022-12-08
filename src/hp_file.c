@@ -43,14 +43,14 @@ HP_info* HP_OpenFile(char *fileName){
   void* data;
   BF_Block *block;
   BF_Block_Init(&block);
-  HP_info info;
+  HP_info *info;
   // επίσης εδω θέλει να γυρνάμε NULL αρα μήπως να μην χρησιμοποιουμε την CALL_BF?
-  CALL_BF(BF_OpenFile(fileName, &fd))
+  BF_OpenFile(fileName, &fd);
   data = BF_Block_GetData(block);  // λογικα εδω παίρνει το 1ο block
   memcpy(&info, data, 5); //εδω διαβαζει απο το data και τα βαζει στο struct info
   
-  if(strcmp(info.fileType, "heap")==0) // αν είναι ίδια
-    return &info; 
+  if(strcmp(info->fileType, "heap")==0) // αν είναι ίδια
+    return info; 
   return NULL ;// αν δεν είναι γυρνάει NULL
 }
 
