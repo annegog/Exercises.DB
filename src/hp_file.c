@@ -6,12 +6,21 @@
 #include "hp_file.h"
 #include "record.h"
 
-#define CALL_BF(call)       \
+#define CALL_BF_NUM(call)       \
 {                           \
   BF_ErrorCode code = call; \
   if (code != BF_OK) {         \
     BF_PrintError(code);    \
-    return HP_ERROR;        \
+    return -1;        \
+  }                         \
+}
+
+#define CALL_BF_NULL(call)       \
+{                           \
+  BF_ErrorCode code = call; \
+  if (code != BF_OK) {         \
+    BF_PrintError(code);    \
+    return NULL;        \
   }                         \
 }
 
@@ -44,8 +53,8 @@ HP_info* HP_OpenFile(char *fileName){
   BF_Block *block;
   BF_Block_Init(&block);
   BF_OpenFile(fileName, &fd);
-  BF_GetBlock(fd, 0, block);
-  data = BF_Block_GetData(block);  // λογικα εδω παίρνει το 1ο block
+  BF_GetBlock(fd, 0, block); // λογικα εδω παίρνει το 1ο block
+  data = BF_Block_GetData(block);  
   HP_info *info=data;
   printf("no error so far 2\n");
   if(strcmp(info->fileType, "heap")==0) // αν είναι ίδια
