@@ -22,26 +22,26 @@ int main() {
   BF_Init(LRU);
 
   HP_CreateFile(FILE_NAME);
-  sleep(30);
-  printf("no error so far 1\n");
+  // sleep(30);
+  printf("Just created the file: %s\n", FILE_NAME);
   HP_info* info = HP_OpenFile(FILE_NAME);
-  printf("no error so far 1.1\n");
-/*
-  Record record;
-  srand(12569874);
-  int r;
-  printf("Insert Entries\n");
-  for (int id = 0; id < RECORDS_NUM; ++id) {
-    record = randomRecord();
-    HP_InsertEntry(info, record);
-  }
+  printf("The file is now open\n");
 
-  printf("RUN PrintAllEntries\n");
-  int id = rand() % RECORDS_NUM;
-  printf("\nSearching for: %d",id);
-  HP_GetAllEntries(info, id);
+  // Record record;
+  // srand(12569874);
+  // int r;
+  // printf("Insert Entries\n");
+  // for (int id = 0; id < RECORDS_NUM; ++id) {
+  //   record = randomRecord();
+  //   HP_InsertEntry(info, record);
+  // }
 
-  HP_CloseFile(info);
-  */
-  //BF_Close();
+  // printf("RUN PrintAllEntries\n");
+  // int id = rand() % RECORDS_NUM;
+  // printf("\nSearching for: %d",id);
+  // HP_GetAllEntries(info, id);
+
+  HP_CloseFile(info); //τα έβγαλα απο σχόλια ώστε να κλείνει και απο την main
+  
+  BF_Close();
 }
