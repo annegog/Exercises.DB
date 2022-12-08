@@ -47,7 +47,7 @@ int HP_CreateFile(char *fileName){
   CALL_BF_NUM(BF_UnpinBlock(block));
 
   CALL_BF_NUM(BF_CloseFile(fd)); //Κλείσιμο αρχείου και αποδέσμευση μνήμης
-  // CALL_BF_NUM(BF_Close());
+  CALL_BF_NUM(BF_Close()); // ΑΑΑΑΑΑΑΑΑΑΑΧ ειχα βάλει αυτο σε σχολιο και δεν ειχε seg... αλλα όταν το ξανα έβαλα εκανε! Τζααμπα χάρηκα
   
   // BF_Block_Destroy(&block); 
   
