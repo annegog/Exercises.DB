@@ -41,7 +41,7 @@ int main() {
   // printf("\nSearching for: %d",id);
   // HP_GetAllEntries(info, id);
 
-  HP_CloseFile(info); //τα έβγαλα απο σχόλια ώστε να κλείνει και απο την main
+  // HP_CloseFile(info); 
   
-  BF_Close();
+  BF_Close(); // τα έβγαλα απο σχόλια ώστε να κλείνει και απο την main
 }
