@@ -50,10 +50,7 @@ HP_info* HP_OpenFile(char *fileName){
   memcpy(&info, data, 5); //εδω διαβαζει απο το data και τα βαζει στο struct info
   
   if(strcmp(info.fileType, "heap")==0) // αν είναι ίδια
-  {
-    return &info;
-  } 
-  
+    return &info; 
   return NULL ;// αν δεν είναι γυρνάει NULL
 }
 
