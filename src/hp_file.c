@@ -52,8 +52,8 @@ HP_info* HP_OpenFile(char *fileName){
   void* data;
   BF_Block *block;
   BF_Block_Init(&block);
-  BF_OpenFile(fileName, &fd);
-  BF_GetBlock(fd, 0, block); // λογικα εδω παίρνει το 1ο block
+  CALL_BF_NULL(BF_OpenFile(fileName, &fd));
+  CALL_BF_NULL(BF_GetBlock(fd, 0, block)); // λογικα εδω παίρνει το 1ο block
   data = BF_Block_GetData(block);  
   HP_info *info=data;
   printf("no error so far 2\n");
