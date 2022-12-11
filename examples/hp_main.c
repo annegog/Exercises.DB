@@ -22,10 +22,10 @@ int main() {
   BF_Init(LRU);
 
   HP_CreateFile(FILE_NAME);
-  sleep(30);
-  printf("no error so far 1\n");
+  //sleep(30);
+  //printf("no error so far 1\n");
   HP_info* info = HP_OpenFile(FILE_NAME);
-  printf("no error so far 1.1\n");
+  //printf("no error so far 1.1\n");
 /*
   Record record;
   srand(12569874);
