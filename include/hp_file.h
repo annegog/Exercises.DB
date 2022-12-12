@@ -9,10 +9,13 @@ typedef struct {
     char fileType[5]; //4 γιατι θα κρατάμε heap/hash
     // δεν ξέρω μήπως θελει 5 και για το '\0'
     int fileDesc;
+    int lastBlockID;
+    int numOfRecords ; // = BF_BLOCK_SIZE/sizeof(Record) - sizeof(HP_block_info);
 } HP_info;
 
 typedef struct {
-    
+    int numOfRecords;
+    BF_Block* nextBlock;
 } HP_block_info;
 
 /*Η συνάρτηση HP_CreateFile χρησιμοποιείται για τη δημιουργία και

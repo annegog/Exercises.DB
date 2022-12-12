@@ -25,8 +25,8 @@ int main() {
   //sleep(30);
   //printf("no error so far 1\n");
   HP_info* info = HP_OpenFile(FILE_NAME);
-  //printf("no error so far 1.1\n");
-  /*
+  // printf("no error so far 1.1\n");
+  
   Record record;
   srand(12569874);
   int r;
@@ -35,7 +35,6 @@ int main() {
     record = randomRecord();
     HP_InsertEntry(info, record);
   }
-  */
 
   // printf("RUN PrintAllEntries\n");
   // int id = rand() % RECORDS_NUM;
