@@ -163,7 +163,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
     return hp_info->lastBlockID;
-  }
+  }  
   else{ // den exoyme
     printf("hello else\n");
     BF_AllocateBlock(fd, block);
