@@ -33,20 +33,20 @@ int HP_CreateFile(char *fileName){
   HP_info info;
 
   memcpy(info.fileType, "heap", strlen("heap")+1);
-  info.fileDesc = fd;
+  
   info.numOfRecords = (BF_BLOCK_SIZE - sizeof(HP_block_info))/sizeof(Record) ;
+  info.lastBlockID = 0;
   // printf(">> fd %d, %d\n",fd, info.fileDesc);
   // printf("num of records = %d\n", info.numOfRecords);
 
   CALL_BF_NUM(BF_CreateFile(fileName));
   CALL_BF_NUM(BF_OpenFile(fileName, &fd));
-  
+  info.fileDesc = fd;
+  printf("create fd-- %d\n",fd);
+
   CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
   data = BF_Block_GetData(block); 
   memcpy(data, &info, 5+sizeof(fd));
-  info.lastBlockID = 0;
-
-
 
   BF_Block_SetDirty(block);
   CALL_BF_NUM(BF_UnpinBlock(block));
@@ -64,7 +64,10 @@ HP_info* HP_OpenFile(char *fileName){
 
   BF_Block_Init(&block);
   //printf("Open the file\n");
-  BF_OpenFile(fileName, &fd);
+  BF_ErrorCode code=BF_OpenFile(fileName, &fd);
+  printf("open fd-- %d\n",fd);
+
+  BF_PrintError(code);
   //printf("Get Block\n");
   if(BF_GetBlock(fd, 0, block) != BF_OK) // λογικα εδω παίρνει το 1ο block
     printf("AAAAA \n");
@@ -72,7 +75,8 @@ HP_info* HP_OpenFile(char *fileName){
   data = BF_Block_GetData(block);  
   HP_info *info=data;
   //printf("type %s\n", info->fileType);
-  printf("fd %d\n",info->fileDesc);
+  //printf("open fd-- %d\n",info->fileDesc);
+  BF_UnpinBlock(block);
   BF_Block_Destroy(&block);
   if(strcmp(info->fileType, "heap") ==0 )
     {
@@ -100,20 +104,42 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
   void* data;
   int id_of_last_block = hp_info->lastBlockID;
   int fd = hp_info->fileDesc;
+    printf("open fd-- %d\n",fd);
+
   HP_block_info block_info;
 
   if(id_of_last_block == 0){
-    BF_AllocateBlock(fd, block);
+    printf("mphke edv giati exoyme to 0 block\n"); 
+
+    BF_ErrorCode code=BF_AllocateBlock(fd, block);
+    BF_PrintError(code); 
+    
+    // hp_info->lastBlockID++;
+   // block_info.numOfRecords = 1;
+   // block_info.nextBlock = NULL;
+
+    data = BF_Block_GetData(block);
+   
+    printf("meta get data\n");
+    Record* rec = data;
+    printf("--rec 1\n");
+    rec[0] = record;
+    printf("---rec 1\n");
+    printRecord(rec[0]);
+    printf("after puting rec 1\n");
+    printf("prin memcopy\n");
+    printf("sizeof(HP_block_info)--%ld\n",sizeof(HP_block_info));
+    printf("sizeof(block_info)--%ld\n",sizeof(block_info));
+
     hp_info->lastBlockID++;
     block_info.numOfRecords = 1;
     block_info.nextBlock = NULL;
 
-    data = BF_Block_GetData(block);
-
-    memcpy(data+(512-(512-sizeof(HP_block_info))), &block_info, sizeof(HP_block_info));
-
-    Record* rec = data;
-    rec[0] = record;
+    int offset=512-sizeof(HP_block_info);
+    memcpy(data+offset, &block_info, sizeof(block_info));
+    printf("meta memcopy\n");
+    //Record* rec = data;
+    //rec[0] = record;
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
     return hp_info->lastBlockID;
@@ -122,7 +148,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
   BF_GetBlock(fd, id_of_last_block, block);
   data = BF_Block_GetData(block); 
 
-  memcpy(&block_info, data+(512-(512-sizeof(HP_block_info))), sizeof(HP_block_info));
+  memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
 
   if(block_info.numOfRecords != hp_info->numOfRecords){ //exoyme xwro
     Record* rec = data;
@@ -143,13 +169,14 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     void* new_data;
     data = BF_Block_GetData(block);
 
-    memcpy(new_data+(512-(512-sizeof(HP_block_info))), &new_block_info, sizeof(HP_block_info));
+    memcpy(new_data+(512-sizeof(HP_block_info)), &new_block_info, sizeof(HP_block_info));
 
     Record* rec = new_data;
     rec[0] = record;
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
     return hp_info->lastBlockID;
+    
   }
 
   return -1;
