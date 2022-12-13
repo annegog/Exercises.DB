@@ -96,54 +96,45 @@ int HP_CloseFile( HP_info* hp_info ){
   //μηπως εδω θελει το BF_close??
   // CALL_BF_NUM(BF_Close(fd));
 }
-
+/////////////////////////να βαλουμε και destroy of block
 int HP_InsertEntry(HP_info* hp_info, Record record){
 
-  printf("insert hp-infoss> fd--%d type--%s lID--%d records--%d\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
+  printf("insert hp-infoss >> \nfd--%d\n type--%s\n lID--%d\n records--%d\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
+
   BF_Block *block;
   BF_Block_Init(&block);
 
   void* data;
-  int id_of_last_block = hp_info->lastBlockID;
-  int fd = hp_info->fileDesc;
-  //printf("insert fd-- %d\n",fd);
-
   HP_block_info block_info;
 
+  int id_of_last_block = hp_info->lastBlockID;
+  int fd = hp_info->fileDesc;
+
+  int offset=512-sizeof(HP_block_info);
+
   if(id_of_last_block == 0){
-    printf("mphke edv giati exoyme to 0 block\n"); 
-
-    BF_ErrorCode code=BF_AllocateBlock(fd, block);
-    BF_PrintError(code); 
-    
-    // hp_info->lastBlockID++;
-   // block_info.numOfRecords = 1;
-   // block_info.nextBlock = NULL;
-
-    data = BF_Block_GetData(block);
+    BF_AllocateBlock(fd, block); //φτιαξε καινουριο μπλοκ
+    data = BF_Block_GetData(block); //και φερτο στην ενδιαεση μνημη
    
-    //printf("meta get data\n");
     Record* rec = data;
-    //printf("--rec 1\n");
     rec[0] = record;
-    //printf("---rec 1\n");
-    printRecord(rec[0]);
-    // printf("after puting rec 1\n");
-    // printf("prin memcopy\n");
-    // printf("sizeof(HP_block_info)--%ld\n",sizeof(HP_block_info));
-    // printf("sizeof(block_info)--%ld\n",sizeof(block_info));
-
-    hp_info->lastBlockID++;
+    //printRecord(rec[0]);
+    
     block_info.numOfRecords = 1;
     block_info.nextBlock = NULL;
-
-    int offset=512-sizeof(HP_block_info);
-    memcpy(data+offset, &block_info, sizeof(block_info));
-    printf("meta memcopy\n");
-    //Record* rec = data;
-    //rec[0] = record;
+    memcpy(data+offset, &block_info, sizeof(HP_block_info));
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
+
+    BF_GetBlock(fd, 0, block); //παρε το μπλοκ 0
+    data = BF_Block_GetData(block); //και φερτο στην ενδιαεση μνημη
+    hp_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
+    memcpy(data, &hp_info, sizeof(HP_info)); //αλλαξε το info στο 1ο μπλοκ
+    BF_Block_SetDirty(block);
+    BF_UnpinBlock(block);
+
+    BF_Block_Destroy(&block);
+
     return hp_info->lastBlockID;
   }
 
@@ -152,40 +143,54 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
 
   memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
 
-  if(block_info.numOfRecords != hp_info->numOfRecords){ //exoyme xwro
-    printf("1.block_info.numOfRecords -- %d\n",block_info.numOfRecords );
-    printf("1.hp_info->numOfRecords -- %d\n",hp_info->numOfRecords );
+  if(block_info.numOfRecords < hp_info->numOfRecords){ //αν υπάρχει χώρος στο μπλοκ
     Record* rec = data;
-    rec[block_info.numOfRecords++] = record;
-    int offset=512-sizeof(HP_block_info);
-    printf("2.block_info.numOfRecords -- %d\n",block_info.numOfRecords );
-    memcpy(data+offset, &block_info, sizeof(block_info));
+    rec[block_info.numOfRecords++] = record; //βαλε στην ασχη του μλποκ το record
+    memcpy(data+offset, &block_info, sizeof(HP_block_info)); // και στο τελος ενημερωσε το bock info
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
+
+    BF_Block_Destroy(&block);
+
     return hp_info->lastBlockID;
   }  
-  else{ // den exoyme
-    printf("hello else\n");
-    BF_AllocateBlock(fd, block);
-    block_info.nextBlock = block;
-    hp_info->lastBlockID++;
-
+  else{ //αν δεν υπάρχει χώρος στο μπλοκ
+    BF_Block *new_block;
     HP_block_info new_block_info;
+    void* new_data;
+
+    BF_Block_Init(&new_block);
+    BF_AllocateBlock(fd, new_block); //φτιάξε καινουριο μπλοκ
+    new_data = BF_Block_GetData(new_block);
+
+    Record* rec = new_data;
+    rec[0] = record;
+
     new_block_info.numOfRecords=1;
     new_block_info.nextBlock = NULL;
+    memcpy(new_data+(512-sizeof(HP_block_info)), &new_block_info, sizeof(HP_block_info));
 
-    //void* new_data;
-    data = BF_Block_GetData(block);
+    BF_Block_SetDirty(new_block);
+    BF_UnpinBlock(new_block);
 
+    block_info.nextBlock = new_block;
     memcpy(data+(512-sizeof(HP_block_info)), &new_block_info, sizeof(HP_block_info));
-
-    Record* rec = data;
-    rec[0] = record;
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
+
+    BF_GetBlock(fd, 0, block); //παρε το μπλοκ 0
+    data = BF_Block_GetData(block); //και φερτο στην ενδιαεση μνημη
+    hp_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
+    memcpy(data, &hp_info, sizeof(HP_info)); //αλλαξε το info στο 1ο μπλοκ
+    BF_Block_SetDirty(block);
+    BF_UnpinBlock(block);
+
+    BF_Block_Destroy(&block);
+    BF_Block_Destroy(&new_block);
+
     return hp_info->lastBlockID; 
-  }//lala
-  return -1;
+  }
+  //return -1;
 }
 
 int HP_GetAllEntries(HP_info* hp_info, int value){
