@@ -31,7 +31,7 @@ int main() {
   srand(12569874);
   int r;
   printf("Insert Entries\n");
-  for (int id = 0; id < RECORDS_NUM; ++id) {
+  for (int id = 0; id < 10; ++id) {
     record = randomRecord();
     HP_InsertEntry(info, record);
   }

@@ -35,6 +35,7 @@ int HP_CreateFile(char *fileName){
   memcpy(info.fileType, "heap", strlen("heap")+1);
   
   info.numOfRecords = (BF_BLOCK_SIZE - sizeof(HP_block_info))/sizeof(Record) ;
+  printf("create info.numOfRecords-- %d\n",info.numOfRecords);
   info.lastBlockID = 0;
   // printf(">> fd %d, %d\n",fd, info.fileDesc);
   // printf("num of records = %d\n", info.numOfRecords);
@@ -46,7 +47,7 @@ int HP_CreateFile(char *fileName){
 
   CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
   data = BF_Block_GetData(block); 
-  memcpy(data, &info, 5+sizeof(fd));
+  memcpy(data, &info, sizeof(HP_info));
 
   BF_Block_SetDirty(block);
   CALL_BF_NUM(BF_UnpinBlock(block));
@@ -98,13 +99,14 @@ int HP_CloseFile( HP_info* hp_info ){
 
 int HP_InsertEntry(HP_info* hp_info, Record record){
 
+  printf("insert hp-infoss> fd--%d type--%s lID--%d records--%d\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
   BF_Block *block;
   BF_Block_Init(&block);
 
   void* data;
   int id_of_last_block = hp_info->lastBlockID;
   int fd = hp_info->fileDesc;
-    printf("open fd-- %d\n",fd);
+  //printf("insert fd-- %d\n",fd);
 
   HP_block_info block_info;
 
@@ -120,16 +122,16 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
 
     data = BF_Block_GetData(block);
    
-    printf("meta get data\n");
+    //printf("meta get data\n");
     Record* rec = data;
-    printf("--rec 1\n");
+    //printf("--rec 1\n");
     rec[0] = record;
-    printf("---rec 1\n");
+    //printf("---rec 1\n");
     printRecord(rec[0]);
-    printf("after puting rec 1\n");
-    printf("prin memcopy\n");
-    printf("sizeof(HP_block_info)--%ld\n",sizeof(HP_block_info));
-    printf("sizeof(block_info)--%ld\n",sizeof(block_info));
+    // printf("after puting rec 1\n");
+    // printf("prin memcopy\n");
+    // printf("sizeof(HP_block_info)--%ld\n",sizeof(HP_block_info));
+    // printf("sizeof(block_info)--%ld\n",sizeof(block_info));
 
     hp_info->lastBlockID++;
     block_info.numOfRecords = 1;
@@ -151,13 +153,19 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
   memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
 
   if(block_info.numOfRecords != hp_info->numOfRecords){ //exoyme xwro
+    printf("1.block_info.numOfRecords -- %d\n",block_info.numOfRecords );
+    printf("1.hp_info->numOfRecords -- %d\n",hp_info->numOfRecords );
     Record* rec = data;
     rec[block_info.numOfRecords++] = record;
+    int offset=512-sizeof(HP_block_info);
+    printf("2.block_info.numOfRecords -- %d\n",block_info.numOfRecords );
+    memcpy(data+offset, &block_info, sizeof(block_info));
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
     return hp_info->lastBlockID;
   }
   else{ // den exoyme
+    printf("hello else\n");
     BF_AllocateBlock(fd, block);
     block_info.nextBlock = block;
     hp_info->lastBlockID++;
