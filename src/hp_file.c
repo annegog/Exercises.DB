@@ -184,7 +184,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
     return hp_info->lastBlockID; 
-  }
+  }//lala
   return -1;
 }
 
