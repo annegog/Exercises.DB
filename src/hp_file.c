@@ -190,7 +190,6 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
 
     return hp_info->lastBlockID; 
   }
-  //return -1;
 }
 
 int HP_GetAllEntries(HP_info* hp_info, int value){
