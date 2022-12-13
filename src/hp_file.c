@@ -171,9 +171,10 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     hp_info->lastBlockID++;
 
     HP_block_info new_block_info;
-    new_block_info.numOfRecords = 1;
+    new_block_info.numOfRecords=1;
     new_block_info.nextBlock = NULL;
 
+    //void* new_data;
     data = BF_Block_GetData(block);
 
     memcpy(data+(512-sizeof(HP_block_info)), &new_block_info, sizeof(HP_block_info));
@@ -182,10 +183,8 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     rec[0] = record;
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
-    return hp_info->lastBlockID;
-    //aaaaaaaaaaaaaaaaaaaaa nj
-  }
-
+    return hp_info->lastBlockID; 
+  }//lala nj
   return -1;
 }
 
@@ -198,7 +197,19 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
     printf("\t");
     printRecord(rec[1]);
     CALL_OR_DIE(BF_UnpinBlock(block));*/
+
     
+  //while(block!=NULL)
+  //{
+    //get data toy block
+    //diabasma eggrafwn //fooorrr i=0;i<block_info.numOfRecords
+    //rec[i].id==id
+    //
+    //kai ellegxow id
+    //kai print
+    //block=block_info.next_block
+  //}
+
    return 0;
 }
 
