@@ -36,12 +36,12 @@ int main() {
     HP_InsertEntry(info, record);
   }
 
-  // printf("RUN PrintAllEntries\n");
-  // int id = rand() % RECORDS_NUM;
-  // printf("\nSearching for: %d",id);
-  // HP_GetAllEntries(info, id);
+  printf("RUN PrintAllEntries\n");
+  int id = rand() % RECORDS_NUM;
+  printf("\nSearching for: %d",id);
+  HP_GetAllEntries(info, id);
 
-  // HP_CloseFile(info); 
+  HP_CloseFile(info); 
   
   BF_Close(); // τα έβγαλα απο σχόλια ώστε να κλείνει και απο την main
 }
