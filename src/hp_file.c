@@ -15,6 +15,9 @@
   }                         \
 }
 
+/////// !!!!!!!!!!!!!!! ////////
+//ΝΑ ΦΤΙΑΞΟΥΜΕ ΤΑ DEFINE//
+
 // #define CALL_BF_NULL(call)       \
 // {                           \
 //   BF_ErrorCode code = call; \
@@ -25,25 +28,20 @@
 // }
 
 int HP_CreateFile(char *fileName){
-  int fd;
-  void* data;
   BF_Block *block;
   BF_Block_Init(&block);
 
   HP_info info;
-
-  memcpy(info.fileType, "heap", strlen("heap")+1);
-  
-  info.numOfRecords = (BF_BLOCK_SIZE - sizeof(HP_block_info))/sizeof(Record) ;
-  printf("create info.numOfRecords-- %d\n",info.numOfRecords);
-  info.lastBlockID = 0;
-  // printf(">> fd %d, %d\n",fd, info.fileDesc);
-  // printf("num of records = %d\n", info.numOfRecords);
+  void* data;
+  int fd;
 
   CALL_BF_NUM(BF_CreateFile(fileName));
   CALL_BF_NUM(BF_OpenFile(fileName, &fd));
+
+  memcpy(info.fileType, "heap", strlen("heap")+1);
+  info.numOfRecords = (BF_BLOCK_SIZE - sizeof(HP_block_info))/sizeof(Record);
+  info.lastBlockID = 0;
   info.fileDesc = fd;
-  printf("create fd-- %d\n",fd);
 
   CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
   data = BF_Block_GetData(block); 
@@ -59,44 +57,34 @@ int HP_CreateFile(char *fileName){
 }
 
 HP_info* HP_OpenFile(char *fileName){
+  BF_Block *block;
+  BF_Block_Init(&block);
+
   int fd;
   void* data;
-  BF_Block *block;
-
-  BF_Block_Init(&block);
-  //printf("Open the file\n");
-  BF_ErrorCode code=BF_OpenFile(fileName, &fd);
-  printf("open fd-- %d\n",fd);
-
-  BF_PrintError(code);
-  //printf("Get Block\n");
-  if(BF_GetBlock(fd, 0, block) != BF_OK) // λογικα εδω παίρνει το 1ο block
-    printf("AAAAA \n");
-  //printf("get data\n");
+  
+  BF_OpenFile(fileName, &fd);
+  BF_GetBlock(fd, 0, block); // λογικα εδω παίρνει το 1ο block
   data = BF_Block_GetData(block);  
+
   HP_info *info=data;
-  //printf("type %s\n", info->fileType);
-  //printf("open fd-- %d\n",info->fileDesc);
   BF_UnpinBlock(block);
   BF_Block_Destroy(&block);
+
   if(strcmp(info->fileType, "heap") ==0 )
     {
       printf("It's a heap!!!!\n");
       return info;
     }
-  printf("OOOOPS!!!!\n");
   return NULL ;
 }
 
 
 int HP_CloseFile( HP_info* hp_info ){
   int fd=hp_info->fileDesc;
-  //printf("fd = %d", fd);
   CALL_BF_NUM(BF_CloseFile(fd));
-  //μηπως εδω θελει το BF_close??
-  // CALL_BF_NUM(BF_Close(fd));
 }
-/////////////////////////να βαλουμε και destroy of block
+
 int HP_InsertEntry(HP_info* hp_info, Record record){
 
   printf("insert hp-infoss >> \n fd--%d\n type--%s\n lID--%d\n records--%d\n\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
