@@ -31,16 +31,16 @@ int main() {
   srand(12569874);
   int r;
   printf("Insert Entries\n");
-  for (int id = 0; id < 15; ++id) {
+  for (int id = 0; id < 150; ++id) {
     record = randomRecord();
     HP_InsertEntry(info, record);
   }
-
+/*
   printf("RUN PrintAllEntries\n");
   int id = rand() % RECORDS_NUM;
   printf("\nSearching for: %d",id);
   HP_GetAllEntries(info, id);
-
+*/
   HP_CloseFile(info); 
   
   BF_Close(); // τα έβγαλα απο σχόλια ώστε να κλείνει και απο την main

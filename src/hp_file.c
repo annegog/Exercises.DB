@@ -91,7 +91,7 @@ HP_info* HP_OpenFile(char *fileName){
 
 int HP_CloseFile( HP_info* hp_info ){
   int fd=hp_info->fileDesc;
-  printf("fd = %d", fd);
+  //printf("fd = %d", fd);
   CALL_BF_NUM(BF_CloseFile(fd));
   //μηπως εδω θελει το BF_close??
   // CALL_BF_NUM(BF_Close(fd));
@@ -99,8 +99,8 @@ int HP_CloseFile( HP_info* hp_info ){
 /////////////////////////να βαλουμε και destroy of block
 int HP_InsertEntry(HP_info* hp_info, Record record){
 
-  printf("insert hp-infoss >> \nfd--%d\n type--%s\n lID--%d\n records--%d\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
-
+  printf("insert hp-infoss >> \n fd--%d\n type--%s\n lID--%d\n records--%d\n\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
+  
   BF_Block *block;
   BF_Block_Init(&block);
 
@@ -126,12 +126,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
 
-    BF_GetBlock(fd, 0, block); //παρε το μπλοκ 0
-    data = BF_Block_GetData(block); //και φερτο στην ενδιαεση μνημη
     hp_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
-    memcpy(data, &hp_info, sizeof(HP_info)); //αλλαξε το info στο 1ο μπλοκ
-    BF_Block_SetDirty(block);
-    BF_UnpinBlock(block);
 
     BF_Block_Destroy(&block);
 
@@ -178,13 +173,8 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
 
-    BF_GetBlock(fd, 0, block); //παρε το μπλοκ 0
-    data = BF_Block_GetData(block); //και φερτο στην ενδιαεση μνημη
     hp_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
-    memcpy(data, &hp_info, sizeof(HP_info)); //αλλαξε το info στο 1ο μπλοκ
-    BF_Block_SetDirty(block);
-    BF_UnpinBlock(block);
-
+   
     BF_Block_Destroy(&block);
     BF_Block_Destroy(&new_block);
 
