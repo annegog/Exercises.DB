@@ -31,13 +31,13 @@ int main() {
   srand(12569874);
   int r;
   printf("Insert Entries\n");
-  for (int id = 0; id < 50; ++id) {
+  for (int id = 0; id < 100; ++id) {
     record = randomRecord();
     HP_InsertEntry(info, record);
   }
 
   printf("RUN PrintAllEntries\n");
-  int id = rand() % 50;
+  int id = rand() % 100;
   printf("\nSearching for: %d\n",id);
   HP_GetAllEntries(info, id);
 

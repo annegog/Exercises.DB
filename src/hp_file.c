@@ -84,7 +84,7 @@ int HP_CloseFile( HP_info* hp_info ){
 
 int HP_InsertEntry(HP_info* hp_info, Record record){
 
-  printf("insert hp-infoss >> \n fd--%d\n type--%s\n lID--%d\n records--%d\n\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
+  // printf("insert hp-infoss >> \n fd--%d\n type--%s\n lID--%d\n records--%d\n\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
   
   BF_Block *block;
   BF_Block_Init(&block);
@@ -154,7 +154,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_UnpinBlock(new_block);
 
     block_info.nextBlock = new_block;
-    memcpy(data+(512-sizeof(HP_block_info)), &new_block_info, sizeof(HP_block_info));
+    memcpy(&new_block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
 
@@ -176,34 +176,35 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
   void* data;
   
   int block_num;
+  int last_record_block = 0;
   BF_GetBlockCounter(fd, &block_num);
-  printf("Blocks = %d\n", block_num);
+  // printf("Blocks = %d\n", block_num);
+    
+  for(int i=1; i<block_num; i++){
+    // printf("\nBlock: %d\t", i);
   
-  for(int i=1; i<block_num; i ++){
-      printf("\nBlock: %d\t", i);
+    BF_GetBlock(fd,i,block);
+    data = BF_Block_GetData(block);
       
-      BF_GetBlock(fd,i,block);
-      data = BF_Block_GetData(block);
-      
-      Record* rec = data;
+    Record* rec = data;
 
-      // memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
-      HP_block_info *block_info = data+(512-sizeof(HP_block_info));
-      printf("num of records: %d\n", block_info->numOfRecords);
+    // memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
+    HP_block_info *block_info = data+(512-sizeof(HP_block_info));
+    // printf("num of records: %d\n", block_info->numOfRecords);
 
-      for(int record=0; record<block_info->numOfRecords; record++){   
-        // printf("record = %d \tid: %d\n",record, rec[record].id);
+    for(int record=0; record<block_info->numOfRecords; record++){   
+      // printf("record = %d \tid: %d\n",record, rec[record].id);
+      // printRecord(rec[record]);
+
+      if(rec[record].id == value){
+        // printf("\tfound it\n");
+        last_record_block = i;
         printRecord(rec[record]);
-
-        if(rec[record].id == value){
-          printf("\tfound it\n");
-          printRecord(rec[record]);
-          printf("Found it after %d Blocks\n", i);  
-        }
       }
-      BF_UnpinBlock(block);
-      // BF_Block_Destroy(&block);
+    }
+    BF_UnpinBlock(block);
+    
   }
-   return 0;
-
+  BF_Block_Destroy(&block);
+  return last_record_block;
 }
