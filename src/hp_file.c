@@ -84,7 +84,7 @@ int HP_CloseFile( HP_info* hp_info ){
 
 int HP_InsertEntry(HP_info* hp_info, Record record){
 
-  // printf("insert hp-infoss >> \n fd--%d\n type--%s\n lID--%d\n records--%d\n\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
+  printf("insert hp-infoss >> \n fd--%d\n type--%s\n lID--%d\n records--%d\n\n", hp_info->fileDesc,hp_info->fileType,hp_info->lastBlockID,hp_info->numOfRecords);
   
   BF_Block *block;
   BF_Block_Init(&block);
@@ -171,7 +171,6 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
 
   BF_Block *block;
   BF_Block_Init(&block);
-  HP_block_info block_info;
 
   int fd = hp_info->fileDesc;  
   void* data;
@@ -180,47 +179,31 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
   BF_GetBlockCounter(fd, &block_num);
   printf("Blocks = %d\n", block_num);
   
-  for(int i=0; i<block_num; i ++){
-      printf("\nBlock: %d\n", i);
-      
+  for(int i=1; i<block_num; i ++){
+      printf("\nBlock: %d\t", i);
       
       BF_GetBlock(fd,i,block);
-      // BF_AllocateBlock(fd, block);
       data = BF_Block_GetData(block);
-
-      memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
-      printf("num of records in this block: %d\n", block_info.numOfRecords);
-
+      
       Record* rec = data;
 
-      for(int record=0; record<block_info.numOfRecords; record++){   
+      // memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
+      HP_block_info *block_info = data+(512-sizeof(HP_block_info));
+      printf("num of records: %d\n", block_info->numOfRecords);
+
+      for(int record=0; record<block_info->numOfRecords; record++){   
         // printf("record = %d \tid: %d\n",record, rec[record].id);
         printRecord(rec[record]);
 
         if(rec[record].id == value){
           printf("\tfound it\n");
           printRecord(rec[record]);
-          printf("Found it after %d Blocks\n", i);
-          
-          BF_UnpinBlock(block);
+          printf("Found it after %d Blocks\n", i);  
         }
-        // printf("it's not here\n");
-        BF_UnpinBlock(block);
-        // BF_Block_Destroy(&block);
-
       }
-    }
-    
-  //while(block!=NULL)
-  //{
-    //get data toy block
-    //diabasma eggrafwn //fooorrr i=0;i<block_info.numOfRecords
-    //rec[i].id==id
-    //
-    //kai ellegxow id
-    //kai print
-    //block=block_info.next_block
-  //}
-
+      BF_UnpinBlock(block);
+      // BF_Block_Destroy(&block);
+  }
    return 0;
+
 }
