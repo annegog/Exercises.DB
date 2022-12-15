@@ -154,7 +154,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_UnpinBlock(new_block);
 
     block_info.nextBlock = new_block;
-    memcpy(&new_block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
+    memcpy(data+(512-sizeof(HP_block_info)), &block_info, sizeof(HP_block_info));
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
 
