@@ -7,10 +7,17 @@
 
 typedef struct {
     // Να το συμπληρώσετε
+    char fileType[5];
+    int fileDesc;
+    long int numBuckets;
+    int capacityOfRecords;
+    int **hashTable //πινακας κατακερματισμου
 } HT_info;
 
 typedef struct {
     // Να το συμπληρώσετε
+    int numOfRecords;
+    //Block* initialBlock; //ενα πινακα απο μπλοκς που να δειχνουν στις υπερχειλισεις!
 } HT_block_info;
 
 /*Η συνάρτηση HT_CreateFile χρησιμοποιείται για τη δημιουργία

@@ -6,11 +6,10 @@
 /* Η δομή HP_info κρατάει μεταδεδομένα που σχετίζονται με το αρχείο σωρού*/
 typedef struct {
     // Να το συμπληρώσετε
-    char fileType[5]; //4 γιατι θα κρατάμε heap/hash
-    // δεν ξέρω μήπως θελει 5 και για το '\0'
+    char fileType[5]; //γιατι θα κρατάμε heap/hash
     int fileDesc;
     int lastBlockID;
-    int numOfRecords ; // = BF_BLOCK_SIZE/sizeof(Record) - sizeof(HP_block_info);
+    int numOfRecords ; //capacity
 } HP_info;
 
 typedef struct {
