@@ -100,18 +100,17 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
 
   long numBuckets = ht_info->numBuckets;
   int idHash = record.id%numBuckets;
-  
   // get blockId for bucket
   int blockId = ht_info->hashTable[idHash];
 
   // get blockID and metadata
   BF_GetBlock(ht_info->fileDesc, blockId, block);
 
-  // check if blockID has enough free space
+  // check if blockID έχει χωρόοο;;;;;;;;
   int numRecords; // = block_info.numOfRecords
 
   if (numRecords < ht_info->capacityOfRecords){
-    // just insert record here
+    // insert record
   } 
   else{ // create new block (+ 1)
     
@@ -123,7 +122,6 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     HT_block_info* new_ht_block_info;
     new_ht_block_info->previousBlockId = blockId;
 
-    // update ht_info hashing table 
     ht_info->hashTable[idHash] = newBlockId;
 
     // insert entry 
