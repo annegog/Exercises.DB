@@ -17,6 +17,7 @@ typedef struct {
 typedef struct {
     // Να το συμπληρώσετε
     int numOfRecords;
+    int previousBlockId;
     //Block* initialBlock; //ενα πινακα απο μπλοκς που να δειχνουν στις υπερχειλισεις!
 } HT_block_info;
 

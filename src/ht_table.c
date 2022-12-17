@@ -31,6 +31,24 @@ int HT_CreateFile(char *fileName,  int buckets){
   info.capacityOfRecords = (BF_BLOCK_SIZE - sizeof(HT_block_info))/sizeof(Record);
   info.fileDesc = fd;
   info.numBuckets=buckets;
+  
+  //------------------------------------------------
+  // ΝΑ ΤΟ ΣΥΖΗΤΗΣΟΥΜΕ ΓΙΑΤΙ ΒΑΡΙΕΜΑΙ ΝΑ ΓΡΑΦΩ
+  int hashTable[] = {0, 1, 2, 3, 4, 5, 6, 7, 9};
+  // ένα block για κάθε κουβά για αρχικοποίηση
+  for (int i=0; i<info.numBuckets; i++){
+      // allocate block i
+  }
+
+  CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
+  data = BF_Block_GetData(block); 
+  memcpy(data, &info, sizeof(HT_info)-sizeof(int*));
+  
+  for (int i=0; i<buckets; i++) { // for every bucket, p 
+    memcpy(data+sizeof(HT_info)-sizeof(int*) + i*sizeof(int), hashTable[i], sizeof(int));
+  }
+
+  //------------------------------------------------
 
   CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
   data = BF_Block_GetData(block); 
@@ -58,15 +76,13 @@ HT_info* HT_OpenFile(char *fileName){
   HT_info *info=data;
   info->hashTable=(int **)malloc(info->numBuckets*sizeof(int *));
   for (int i=0; i<info->numBuckets; i++)
-  {
     info->hashTable[i]=malloc(2*sizeof(int));
-  }
+
   BF_UnpinBlock(block);
   BF_Block_Destroy(&block);
 
-  if(strcmp(info->fileType, "heap") ==0 )
+  if(strcmp(info->fileType, "hash") ==0 )
     return info;
-
   return NULL;
 }
 
@@ -79,6 +95,39 @@ int HT_CloseFile( HT_info* HT_info ){
 }
 
 int HT_InsertEntry(HT_info* ht_info, Record record){
+  BF_Block *block;
+  BF_Block_Init(&block);
+
+  long numBuckets = ht_info->numBuckets;
+  int idHash = record.id%numBuckets;
+  
+  // get blockId for bucket
+  int blockId = ht_info->hashTable[idHash];
+
+  // get blockID and metadata
+  BF_GetBlock(ht_info->fileDesc, blockId, block);
+
+  // check if blockID has enough free space
+  int numRecords; // = block_info.numOfRecords
+
+  if (numRecords < ht_info->capacityOfRecords){
+    // just insert record here
+  } 
+  else{ // create new block (+ 1)
+    
+    int newBlockId; 
+    BF_GetBlockCounter(ht_info->fileDesc, &newBlockId);
+    newBlockId += 1;
+    
+    // set its previous block to the previous blockId
+    HT_block_info* new_ht_block_info;
+    new_ht_block_info->previousBlockId = blockId;
+
+    // update ht_info hashing table 
+    ht_info->hashTable[idHash] = newBlockId;
+
+    // insert entry 
+  } 
     return 0;
 }
 
