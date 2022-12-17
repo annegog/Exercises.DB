@@ -11,7 +11,8 @@ typedef struct {
     int fileDesc;
     long int numBuckets;
     int capacityOfRecords;
-    int **hashTable //πινακας κατακερματισμου
+    int **hashTable; //πινακας κατακερματισμου
+    int sizeOfHashTable; //
 } HT_info;
 
 typedef struct {

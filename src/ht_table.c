@@ -77,6 +77,8 @@ HT_info* HT_OpenFile(char *fileName){
   info->hashTable=(int **)malloc(info->numBuckets*sizeof(int *));
   for (int i=0; i<info->numBuckets; i++)
     info->hashTable[i]=malloc(2*sizeof(int));
+  info->sizeOfHashTable=0;//info->numBuckets;
+  //γιατι ακομα δεν εχει ανατεθει καποιο μπλοκ σε καποιο bucket
 
   BF_UnpinBlock(block);
   BF_Block_Destroy(&block);
@@ -98,14 +100,50 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   BF_Block *block;
   BF_Block_Init(&block);
 
-  long numBuckets = ht_info->numBuckets;
-  int idHash = record.id%numBuckets;
+  void* data;
+  HT_block_info block_info;
+
+  int fd=ht_info->fileDesc;
+  long int numBuckets = ht_info->numBuckets;
+  int bucket = record.id%numBuckets;
+  //int num_of_block;
   // get blockId for bucket
-  int blockId = ht_info->hashTable[idHash];
+  int blockId; //= ht_info->hashTable[idHash];
+  int check=0;
+  for (int i=0; i<ht_info->sizeOfHashTable; i++)
+  {
+    if (ht_info->hashTable[i][0]==bucket)
+    {
+      //να ελεγχουμε αν το block ειναι γεματο//νομιζω αυτο δεν μας κανει πολυ περιπλοκο
+      //η απλα να κραταμε το τελευταιο μπλοκ που βρισκουμε για αυτο το bucket
+      //αφου ουσιαστικα φτιαχνουμε καινουριο block αφου πρωτα γεμισουν τα αλλα.
+      check=1;
+      blockId=ht_info->hashTable[i][1];
+    }
+  }
+  
+  if (check==0)
+  {
+    //δεν υπαρχει καποιο μπλοκ ακομα για αυτο το buckrt
+    //αρα δημιουργουμε ενα και ενημερωνουμρ το hashtable
+  }
 
   // get blockID and metadata
-  BF_GetBlock(ht_info->fileDesc, blockId, block);
+  BF_GetBlock(fd, blockId, block);
+  //επειτα θα ελεγχουμε αν ειναι γεματο
+  //αν ειναι φτιαχνουμε καινουριο block για αυτο το bucket
+  //αλλιως το βαζουμε στο ηδη υπαρχον
+  data = BF_Block_GetData(block); 
 
+  memcpy(&block_info, data+(512-sizeof(HT_block_info)), sizeof(HT_block_info));
+
+  if(block_info.numOfRecords < ht_info->capacityOfRecords){
+
+  }
+  else{
+
+  }
+  
   // check if blockID έχει χωρόοο;;;;;;;;
   int numRecords; // = block_info.numOfRecords
 
