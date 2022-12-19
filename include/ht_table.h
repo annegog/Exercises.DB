@@ -12,7 +12,8 @@ typedef struct {
     long int numBuckets;
     int capacityOfRecords;
     int **hashTable; //πινακας κατακερματισμου
-    int sizeOfHashTable; //
+    int occupiedPosInHT; //sizeOfHashTable; //
+    int sizeOfHT; 
     int lastBlockID; //
 } HT_info;
 

@@ -34,11 +34,11 @@ int HT_CreateFile(char *fileName,  int buckets){
   
   //------------------------------------------------
   // ΝΑ ΤΟ ΣΥΖΗΤΗΣΟΥΜΕ ΓΙΑΤΙ ΒΑΡΙΕΜΑΙ ΝΑ ΓΡΑΦΩ
-  int hashTable[] = {0, 1, 2, 3, 4, 5, 6, 7, 9};
-  // ένα block για κάθε κουβά για αρχικοποίηση
-  for (int i=0; i<info.numBuckets; i++){
-      // allocate block i
-  }
+  // int hashTable[] = {0, 1, 2, 3, 4, 5, 6, 7, 9};
+  // // ένα block για κάθε κουβά για αρχικοποίηση
+  // for (int i=0; i<info.numBuckets; i++){
+  //     // allocate block i
+  // }
 
   // CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
   // data = BF_Block_GetData(block); 
@@ -76,7 +76,8 @@ HT_info* HT_OpenFile(char *fileName){
   info->hashTable=(int **)malloc(info->numBuckets*sizeof(int *));
   for (int i=0; i<info->numBuckets; i++)
     info->hashTable[i]=malloc(2*sizeof(int));
-  info->sizeOfHashTable=0;//info->numBuckets;
+  info->occupiedPosInHT=0;//info->numBuckets;
+  info->sizeOfHT=info->numBuckets;
   //γιατι ακομα δεν εχει ανατεθει καποιο μπλοκ σε καποιο bucket
   //?? ΕΠΙΣΗΣ ΜΗΠΩΣ ΝΑ ΒΑΛΟΥΜΕ ΣΕ ΟΛΕΣ ΤΙΣ ΘΕΣΕΙΣ ΤΟ -1, γιατι δεν ξερω αν αρχικοποιει τον πινακα σε 0
 
@@ -106,20 +107,30 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   int fd=ht_info->fileDesc;
   long int numBuckets = ht_info->numBuckets;
   int bucket = record.id%numBuckets;
-  //int num_of_block;
   // get blockId for bucket
   int offset=512-sizeof(HT_block_info);
   int blockId; //= ht_info->hashTable[idHash];
   int check=0;
 
-  for (int i=0; i<ht_info->sizeOfHashTable; i++)
+  if(ht_info->occupiedPosInHT==ht_info->sizeOfHT)
+  {
+    //realloc 
+    int new_size=ht_info->sizeOfHT+ht_info->numBuckets;
+    int old_size=ht_info->sizeOfHT;
+    ht_info->hashTable = realloc(ht_info->hashTable, new_size*sizeof(int *));
+    for (int i=0; i<ht_info->numBuckets; i++)
+    {
+      ht_info->hashTable[old_size+i]=malloc(2*sizeof(int));
+    }
+    ht_info->sizeOfHT=new_size;
+  }
+
+  for (int i=0; i<ht_info->occupiedPosInHT; i++)
   {
     if (ht_info->hashTable[i][0]==bucket)
     {
-      //να ελεγχουμε αν το block ειναι γεματο//νομιζω αυτο δεν μας κανει πολυ περιπλοκο
-      //η απλα να κραταμε το τελευταιο μπλοκ που βρισκουμε για αυτο το bucket
+      //απλα να κραταμε το τελευταιο μπλοκ που βρισκουμε για αυτο το bucket
       //αφου ουσιαστικα φτιαχνουμε καινουριο block αφου πρωτα γεμισουν τα αλλα.
-      // "αννα"---- αυτο που λες το κραταμεεε στο bf_block_info με το previousBlockId.. αν καταλαβα καλα
       check=1;
       blockId=ht_info->hashTable[i][1];
     }
@@ -128,10 +139,8 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   if (check==0)
   {
     //lastBlockID
-    //δεν υπαρχει το bucket (αρα και το αντιστοιχο μπλοκ)
-    //συνεπως οπως και να εχει θα φτιαξουμε καινουριο μπλοκ αρα δεν μας ενδιαφερει να 
-    //να ελεγξουμε αν το last block ειναι το 0.. ΣΩΣΤΑ??
-
+    //θα φτιαξουμε καινουριο μπλοκ αρα δεν μας ενδιαφερει να 
+    //να ελεγξουμε αν το last block ειναι το 0
     //αρα δημιουργουμε ενα και ενημερωνουμρ το hashtable
     //και βαζουμε και την εγγραφη
     
@@ -241,10 +250,19 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   int block_num;
   int last_record_block = 0;
   long int numBuckets = ht_info->numBuckets;
-  // int bucket = value.id%numBuckets; 
+  int bucket = value%numBuckets; 
 
   // int blockId = ht_info->hashTable[bucket][];
-  BF_GetBlock(fd,i,block);
+  for (int i=ht_info->occupiedPosInHT-1; i>=0; i--)
+  {
+    if(ht_info->hashTable[i][0]==bucket)
+    {
+      block_num=ht_info->hashTable[i][1];
+      break;
+    }
+  }
+
+  BF_GetBlock(fd,block_num,block);
   data = BF_Block_GetData(block);
       
   Record* rec = data;
@@ -255,6 +273,7 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   int block_counter=0;
 
   while (block_info.previousBlockId) {
+    //
     for (int i=0; i < block_info.numOfRecords; i++){
       print_record();
       // return block_counter
