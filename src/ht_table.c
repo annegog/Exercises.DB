@@ -31,7 +31,7 @@ int HT_CreateFile(char *fileName,  int buckets){
   info.capacityOfRecords = (BF_BLOCK_SIZE - sizeof(HT_block_info))/sizeof(Record);
   info.fileDesc = fd;
   info.numBuckets=buckets;
-  info.lastBlockID=0;
+  
   //------------------------------------------------
   // ΝΑ ΤΟ ΣΥΖΗΤΗΣΟΥΜΕ ΓΙΑΤΙ ΒΑΡΙΕΜΑΙ ΝΑ ΓΡΑΦΩ
   int hashTable[] = {0, 1, 2, 3, 4, 5, 6, 7, 9};
@@ -40,14 +40,13 @@ int HT_CreateFile(char *fileName,  int buckets){
       // allocate block i
   }
 
-  CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
-  data = BF_Block_GetData(block); 
-  memcpy(data, &info, sizeof(HT_info)-sizeof(int*)); 
+  // CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
+  // data = BF_Block_GetData(block); 
+  // memcpy(data, &info, sizeof(HT_info)-sizeof(int*));
   
-  for (int i=0; i<buckets; i++) { // for every bucket, p 
-    memcpy(data+sizeof(HT_info)-sizeof(int*) + i*sizeof(int), hashTable[i], sizeof(int));
-  }
-
+  // for (int i=0; i<buckets; i++) { // for every bucket, p 
+  //   memcpy(data+sizeof(HT_info)-sizeof(int*) + i*sizeof(int), hashTable[i], sizeof(int));
+  // }
   //------------------------------------------------
 
   CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
@@ -120,6 +119,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
       //να ελεγχουμε αν το block ειναι γεματο//νομιζω αυτο δεν μας κανει πολυ περιπλοκο
       //η απλα να κραταμε το τελευταιο μπλοκ που βρισκουμε για αυτο το bucket
       //αφου ουσιαστικα φτιαχνουμε καινουριο block αφου πρωτα γεμισουν τα αλλα.
+      // "αννα"---- αυτο που λες το κραταμεεε στο bf_block_info με το previousBlockId.. αν καταλαβα καλα
       check=1;
       blockId=ht_info->hashTable[i][1];
     }
@@ -231,7 +231,36 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   //   return 0;
 }
 
-int HT_GetAllEntries(HT_info* ht_info, void *value ){
+int HT_GetAllEntries(HT_info* ht_info, int value ){
+  BF_Block *block;
+  BF_Block_Init(&block);
+
+  int fd = ht_info->fileDesc;  
+  void* data;
+  
+  int block_num;
+  int last_record_block = 0;
+  long int numBuckets = ht_info->numBuckets;
+  // int bucket = value.id%numBuckets; 
+
+  // int blockId = ht_info->hashTable[bucket][];
+  BF_GetBlock(fd,i,block);
+  data = BF_Block_GetData(block);
+      
+  Record* rec = data;
+  HT_block_info block_info;
+
+  memcpy(&block_info, data+(512-sizeof(HT_block_info)), sizeof(HT_block_info));
+  
+  int block_counter=0;
+
+  while (block_info.previousBlockId) {
+    for (int i=0; i < block_info.numOfRecords; i++){
+      print_record();
+      // return block_counter
+    }
+  }
+      
     return 0;
 }
 
