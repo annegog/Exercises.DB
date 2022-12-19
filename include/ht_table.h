@@ -13,6 +13,7 @@ typedef struct {
     int capacityOfRecords;
     int **hashTable; //πινακας κατακερματισμου
     int sizeOfHashTable; //
+    int lastBlockID; //
 } HT_info;
 
 typedef struct {
