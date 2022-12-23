@@ -92,7 +92,14 @@ HT_info* HT_OpenFile(char *fileName){
 
 int HT_CloseFile( HT_info* HT_info ){
   int fd=HT_info->fileDesc;
-  //free the malloc 
+  
+  //free the malloc   
+  for (int i=0; i<HT_info->sizeOfHT; i++)
+  {
+    free(HT_info->hashTable[i]);
+  }
+  free(HT_info->hashTable);
+
   CALL_BF_NUM(BF_CloseFile(fd));
   return 0;
 }
