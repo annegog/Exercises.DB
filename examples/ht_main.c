@@ -27,14 +27,14 @@ int main() {
   srand(12569874);
   //int r;
   printf("Insert Entries\n");
-  for (int id = 0; id < 10; ++id) {
+  for (int id = 0; id < 550; ++id) {
     record = randomRecord();
     HT_InsertEntry(info, record);
   }
 
   printf("RUN PrintAllEntries\n");
-  int id = rand() % RECORDS_NUM;
-  HT_GetAllEntries(info, &id);
+  int id = rand() % 550;
+  HT_GetAllEntries(info, id);
 
   HT_CloseFile(info);
   BF_Close();

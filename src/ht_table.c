@@ -165,6 +165,9 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     BF_UnpinBlock(block);
 
     ht_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
+    ht_info->hashTable[ht_info->occupiedPosInHT][0] = bucket;
+    ht_info->hashTable[ht_info->occupiedPosInHT][1] = ht_info->lastBlockID;
+    ht_info->occupiedPosInHT++;
 
     BF_Block_Destroy(&block);
 
@@ -218,7 +221,10 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     BF_UnpinBlock(block);
 
     ht_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
-   
+    ht_info->hashTable[ht_info->occupiedPosInHT][0] = bucket;
+    ht_info->hashTable[ht_info->occupiedPosInHT][1] = ht_info->lastBlockID;
+    ht_info->occupiedPosInHT++;
+
     BF_Block_Destroy(&block);
     BF_Block_Destroy(&new_block);
 
@@ -254,11 +260,10 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
 
   int fd = ht_info->fileDesc;  
   void* data;
-  
   int block_num;
   long int numBuckets = ht_info->numBuckets;
-  int bucket = value%numBuckets; 
-
+  int bucket = value%numBuckets;
+ 
   for (int i=ht_info->occupiedPosInHT-1; i>=0; i--){
     if(ht_info->hashTable[i][0]==bucket){
       block_num=ht_info->hashTable[i][1];
@@ -268,17 +273,16 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
 
   HT_block_info *block_info;
   int block_counter=0;
-
+  
   do{
     BF_GetBlock(fd,block_num,block);
     data = BF_Block_GetData(block);
-    
-    Record* rec = data;
+
+    Record* rec = data;    
     block_info = data+(512-sizeof(HT_block_info));
-  
+
     for (int record=0; record < block_info->numOfRecords; record++){
       if(rec[record].id == value){
-        printf("\tfound it\n");
         printRecord(rec[record]);
       }
     }
@@ -286,7 +290,7 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
     BF_UnpinBlock(block);
 
   } while(( block_num = block_info->previousBlockId ) != 0);
-
+  
   BF_Block_Destroy(&block);
   return block_counter;
 }
