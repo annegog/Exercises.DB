@@ -92,7 +92,8 @@ HT_info* HT_OpenFile(char *fileName){
 
 int HT_CloseFile( HT_info* HT_info ){
   int fd=HT_info->fileDesc;
-  //free the malloc 
+  //free the malloc
+  
   CALL_BF_NUM(BF_CloseFile(fd));
   return 0;
 }
@@ -152,7 +153,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     // printRecord(rec[0]);
     
     block_info.numOfRecords = 1;
-    //block_info.nextBlock = NULL;
+    block_info.previousBlockId = 0;
     memcpy(data+offset, &block_info, sizeof(HT_block_info));
     BF_Block_SetDirty(block);
     BF_UnpinBlock(block);
@@ -198,6 +199,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     rec[0] = record;
 
     new_block_info.numOfRecords=1;
+    new_block_info.previousBlockId = blockId; 
     //new_block_info.nextBlock = NULL;
     memcpy(new_data+(512-sizeof(HT_block_info)), &new_block_info, sizeof(HT_block_info));
 
@@ -214,7 +216,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     BF_Block_Destroy(&block);
     BF_Block_Destroy(&new_block);
 
-    return blockId;
+    return ht_info->lastBlockID;
   }
   
   // check if blockID έχει χωρόοο;;;;;;;;
@@ -248,39 +250,39 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   void* data;
   
   int block_num;
-  int last_record_block = 0;
   long int numBuckets = ht_info->numBuckets;
   int bucket = value%numBuckets; 
 
-  // int blockId = ht_info->hashTable[bucket][];
-  for (int i=ht_info->occupiedPosInHT-1; i>=0; i--)
-  {
-    if(ht_info->hashTable[i][0]==bucket)
-    {
+  for (int i=ht_info->occupiedPosInHT-1; i>=0; i--){
+    if(ht_info->hashTable[i][0]==bucket){
       block_num=ht_info->hashTable[i][1];
       break;
     }
   }
 
-  BF_GetBlock(fd,block_num,block);
-  data = BF_Block_GetData(block);
-      
-  Record* rec = data;
-  HT_block_info block_info;
-
-  memcpy(&block_info, data+(512-sizeof(HT_block_info)), sizeof(HT_block_info));
-  
+  HT_block_info *block_info;
   int block_counter=0;
 
-  while (block_info.previousBlockId) {
-    //
-    for (int i=0; i < block_info.numOfRecords; i++){
-      print_record();
-      // return block_counter
+  do{
+    BF_GetBlock(fd,block_num,block);
+    data = BF_Block_GetData(block);
+    
+    Record* rec = data;
+    block_info = data+(512-sizeof(HT_block_info));
+  
+    for (int record=0; record < block_info->numOfRecords; record++){
+      if(rec[record].id == value){
+        printf("\tfound it\n");
+        printRecord(rec[record]);
+      }
     }
-  }
-      
-    return 0;
+    block_counter++;
+    BF_UnpinBlock(block);
+
+  } while(( block_num = block_info->previousBlockId ) != 0);
+
+  BF_Block_Destroy(&block);
+  return block_counter;
 }
 
 
