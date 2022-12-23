@@ -179,32 +179,23 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
   int block_num;
   int last_record_block = 0;
   BF_GetBlockCounter(fd, &block_num);
-  // printf("Blocks = %d\n", block_num);
     
   for(int i=1; i<block_num; i++){
-    // printf("\nBlock: %d\t", i);
   
     BF_GetBlock(fd,i,block);
     data = BF_Block_GetData(block);
       
     Record* rec = data;
-
     // memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info));
     HP_block_info *block_info = data+(512-sizeof(HP_block_info));
-    // printf("num of records: %d\n", block_info->numOfRecords);
 
     for(int record=0; record<block_info->numOfRecords; record++){   
-      // printf("record = %d \tid: %d\n",record, rec[record].id);
-      // printRecord(rec[record]);
-
       if(rec[record].id == value){
-        // printf("\tfound it\n");
         last_record_block = i;
         printRecord(rec[record]);
       }
     }
     BF_UnpinBlock(block);
-    
   }
   BF_Block_Destroy(&block);
   return last_record_block;
