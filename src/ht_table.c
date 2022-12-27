@@ -11,7 +11,7 @@
     BF_ErrorCode code = call; \
     if (code != BF_OK) {      \
       BF_PrintError(code);    \
-      return -1;              \      
+      return -1;              \
     }                         \
   }
   //exit(code);  ebgala ayto kai ebla to return
