@@ -11,10 +11,24 @@
     BF_ErrorCode code = call; \
     if (code != BF_OK) {      \
       BF_PrintError(code);    \
-      exit(code);             \
+      return -1;              \      
     }                         \
   }
+  //exit(code);  ebgala ayto kai ebla to return
 
+#define CALL_BF_NULL(call)  \
+{                           \
+  BF_ErrorCode code = call; \
+  if (code != BF_OK) {      \
+    BF_PrintError(code);    \
+    return NULL;            \
+  }                         \
+}
+
+//ΓΕΝΙΚΑ ΝΑ ΕΛΕΓΞΟΥΜΕ 
+//--ΤΟ MALLOC+REALLOC
+//--ΑΝ ΠΡΕΠΕΙ ΚΑΠΟΙΑ ΑΛΛΗ ΣΤΙΓΜΗ ΝΑ ΓΥΡΝΑΜΕ ΛΑΘΟΣ
+//--ΤΟ BLOCK_DESTROY ΓΥΡΝΑΕΙ INT ΜΗΠΩΣ ΝΑ ΕΛΕΓΧΟΥΜΕ ΚΑΙ ΑΥΤΟ
 
 int HT_CreateFile(char *fileName,  int buckets){
   BF_Block *block;
@@ -68,20 +82,23 @@ HT_info* HT_OpenFile(char *fileName){
   int fd;
   void* data;
   
-  BF_OpenFile(fileName, &fd);
-  BF_GetBlock(fd, 0, block); // λογικα εδω παίρνει το 1ο block
+  CALL_BF_NULL(BF_OpenFile(fileName, &fd));
+  CALL_BF_NULL(BF_GetBlock(fd, 0, block)); // λογικα εδω παίρνει το 1ο block
   data = BF_Block_GetData(block);  
 
   HT_info *info=data;
   info->hashTable=(int **)malloc(info->numBuckets*sizeof(int *));
   for (int i=0; i<info->numBuckets; i++)
     info->hashTable[i]=malloc(2*sizeof(int));
+    //mhpws na elegxoyme an ontws gientai to malloc
+
   info->occupiedPosInHT=0;//info->numBuckets;
   info->sizeOfHT=info->numBuckets;
   //γιατι ακομα δεν εχει ανατεθει καποιο μπλοκ σε καποιο bucket
   //?? ΕΠΙΣΗΣ ΜΗΠΩΣ ΝΑ ΒΑΛΟΥΜΕ ΣΕ ΟΛΕΣ ΤΙΣ ΘΕΣΕΙΣ ΤΟ -1, γιατι δεν ξερω αν αρχικοποιει τον πινακα σε 0
 
-  BF_UnpinBlock(block);
+  BF_Block_SetDirty(block);// prosuesa kai ayto logika xreiazetai
+  CALL_BF_NULL(BF_UnpinBlock(block));
   BF_Block_Destroy(&block);
 
   if(strcmp(info->fileType, "hash") ==0 )
@@ -151,7 +168,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     //αρα δημιουργουμε ενα και ενημερωνουμρ το hashtable
     //και βαζουμε και την εγγραφη
     
-    BF_AllocateBlock(fd, block); //φτιαξε καινουριο μπλοκ
+    CALL_BF_NUM(BF_AllocateBlock(fd, block)); //φτιαξε καινουριο μπλοκ
     data = BF_Block_GetData(block); //και φερτο στην ενδιαεση μνημη
    
     Record* rec = data;
@@ -162,7 +179,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     block_info.previousBlockId = 0;
     memcpy(data+offset, &block_info, sizeof(HT_block_info));
     BF_Block_SetDirty(block);
-    BF_UnpinBlock(block);
+    CALL_BF_NUM(BF_UnpinBlock(block));
 
     ht_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
     ht_info->hashTable[ht_info->occupiedPosInHT][0] = bucket;
@@ -176,7 +193,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   }
 
   // get blockID and metadata
-  BF_GetBlock(fd, blockId, block);
+  CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
   //επειτα θα ελεγχουμε αν ειναι γεματο
   //αν ειναι φτιαχνουμε καινουριο block για αυτο το bucket
   //αλλιως το βαζουμε στο ηδη υπαρχον
@@ -189,7 +206,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     rec[block_info.numOfRecords++] = record; //βαλε στην ασχη του μλποκ το record
     memcpy(data+offset, &block_info, sizeof(HT_block_info)); // και στο τελος ενημερωσε το bock info
     BF_Block_SetDirty(block);
-    BF_UnpinBlock(block);
+    CALL_BF_NUM(BF_UnpinBlock(block));
 
     BF_Block_Destroy(&block);
 
@@ -201,7 +218,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     void* new_data;
 
     BF_Block_Init(&new_block);
-    BF_AllocateBlock(fd, new_block); //φτιάξε καινουριο μπλοκ
+    CALL_BF_NUM(BF_AllocateBlock(fd, new_block)); //φτιάξε καινουριο μπλοκ
     new_data = BF_Block_GetData(new_block);
 
     Record* rec = new_data;
@@ -213,12 +230,12 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     memcpy(new_data+(512-sizeof(HT_block_info)), &new_block_info, sizeof(HT_block_info));
 
     BF_Block_SetDirty(new_block);
-    BF_UnpinBlock(new_block);
+    CALL_BF_NUM(BF_UnpinBlock(new_block));
 
     //block_info.nextBlock = new_block;
     memcpy(data+offset, &block_info, sizeof(HT_block_info));
     BF_Block_SetDirty(block);
-    BF_UnpinBlock(block);
+    CALL_BF_NUM(BF_UnpinBlock(block));
 
     ht_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
     ht_info->hashTable[ht_info->occupiedPosInHT][0] = bucket;
@@ -275,7 +292,7 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   int block_counter=0;
   
   do{
-    BF_GetBlock(fd,block_num,block);
+    CALL_BF_NUM(BF_GetBlock(fd,block_num,block));
     data = BF_Block_GetData(block);
 
     Record* rec = data;    
@@ -287,7 +304,7 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
       }
     }
     block_counter++;
-    BF_UnpinBlock(block);
+    CALL_BF_NUM(BF_UnpinBlock(block));
 
   } while(( block_num = block_info->previousBlockId ) != 0);
   

@@ -6,7 +6,7 @@
 #include "bf.h"
 #include "hp_file.h"
 
-#define RECORDS_NUM 1000 // you can change it if you want
+#define RECORDS_NUM 594 //1000 // you can change it if you want
 #define FILE_NAME "data.db"
 
 #define CALL_OR_DIE(call)     \
@@ -22,26 +22,23 @@ int main() {
   BF_Init(LRU);
 
   HP_CreateFile(FILE_NAME);
-  //sleep(30);
-  //printf("no error so far 1\n");
   HP_info* info = HP_OpenFile(FILE_NAME);
-  // printf("no error so far 1.1\n");
   
   Record record;
   srand(12569874);
   int r;
   printf("Insert Entries\n");
-  for (int id = 0; id < 594; ++id) {
+  for (int id = 0; id < RECORDS_NUM; ++id) {
     record = randomRecord();
     HP_InsertEntry(info, record);
   }
 
   printf("RUN PrintAllEntries\n");
-  int id = rand() % 594;
+  int id = rand() % RECORDS_NUM;
   printf("\nSearching for: %d\n",id);
   HP_GetAllEntries(info, id);
 
   HP_CloseFile(info); 
   
-  BF_Close(); // τα έβγαλα απο σχόλια ώστε να κλείνει και απο την main
+  BF_Close(); 
 }

@@ -6,26 +6,23 @@
 #include "hp_file.h"
 #include "record.h"
 
-#define CALL_BF_NUM(call)       \
+#define CALL_BF_NUM(call)   \
 {                           \
   BF_ErrorCode code = call; \
-  if (code != BF_OK) {         \
+  if (code != BF_OK) {      \
     BF_PrintError(code);    \
-    return -1;        \
+    return -1;              \
   }                         \
 }
 
-/////// !!!!!!!!!!!!!!! ////////
-//ΝΑ ΦΤΙΑΞΟΥΜΕ ΤΑ DEFINE//
-
-// #define CALL_BF_NULL(call)       \
-// {                           \
-//   BF_ErrorCode code = call; \
-//   if (code != BF_OK) {         \
-//     BF_PrintError(code);    \
-//     return NULL;        \
-//   }                         \
-// }
+#define CALL_BF_NULL(call)  \
+{                           \
+  BF_ErrorCode code = call; \
+  if (code != BF_OK) {      \
+    BF_PrintError(code);    \
+    return NULL;            \
+  }                         \
+}
 
 int HP_CreateFile(char *fileName){
   BF_Block *block;
@@ -63,12 +60,13 @@ HP_info* HP_OpenFile(char *fileName){
   int fd;
   void* data;
   
-  BF_OpenFile(fileName, &fd);
-  BF_GetBlock(fd, 0, block); // λογικα εδω παίρνει το 1ο block
+  CALL_BF_NULL(BF_OpenFile(fileName, &fd));
+  CALL_BF_NULL(BF_GetBlock(fd, 0, block)); // λογικα εδω παίρνει το 1ο block
   data = BF_Block_GetData(block);  
 
   HP_info *info=data;
-  BF_UnpinBlock(block);
+  BF_Block_SetDirty(block);
+  CALL_BF_NULL(BF_UnpinBlock(block));
   BF_Block_Destroy(&block);
 
   if(strcmp(info->fileType, "heap") ==0 )
@@ -98,7 +96,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
   int offset=512-sizeof(HP_block_info);
 
   if(id_of_last_block == 0){
-    BF_AllocateBlock(fd, block); //φτιαξε καινουριο μπλοκ
+    CALL_BF_NUM(BF_AllocateBlock(fd, block)); //φτιαξε καινουριο μπλοκ
     data = BF_Block_GetData(block); //και φερτο στην ενδιαεση μνημη
    
     Record* rec = data;
@@ -109,7 +107,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     block_info.nextBlock = NULL;
     memcpy(data+offset, &block_info, sizeof(HP_block_info));
     BF_Block_SetDirty(block);
-    BF_UnpinBlock(block);
+    CALL_BF_NUM(BF_UnpinBlock(block));
 
     hp_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
 
@@ -118,7 +116,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     return hp_info->lastBlockID;
   }
 
-  BF_GetBlock(fd, id_of_last_block, block);
+  CALL_BF_NUM(BF_GetBlock(fd, id_of_last_block, block));
   data = BF_Block_GetData(block); 
 
   memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info)); 
@@ -129,9 +127,9 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     rec[block_info.numOfRecords++] = record; //βαλε στην ασχη του μλποκ το record
     memcpy(data+offset, &block_info, sizeof(HP_block_info)); // και στο τελος ενημερωσε το bock info
     BF_Block_SetDirty(block);
-    BF_UnpinBlock(block);
+    CALL_BF_NUM(BF_UnpinBlock(block));
 
-    BF_Block_Destroy(&block);
+    BF_Block_Destroy(&block); 
 
     return hp_info->lastBlockID;
   }  
@@ -141,7 +139,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     void* new_data;
 
     BF_Block_Init(&new_block);
-    BF_AllocateBlock(fd, new_block); //φτιάξε καινουριο μπλοκ
+    CALL_BF_NUM(BF_AllocateBlock(fd, new_block)); //φτιάξε καινουριο μπλοκ
     new_data = BF_Block_GetData(new_block);
 
     Record* rec = new_data;
@@ -152,12 +150,12 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     memcpy(new_data+(512-sizeof(HP_block_info)), &new_block_info, sizeof(HP_block_info));
 
     BF_Block_SetDirty(new_block);
-    BF_UnpinBlock(new_block);
+    CALL_BF_NUM(BF_UnpinBlock(new_block));
 
     block_info.nextBlock = new_block;
     memcpy(data+(512-sizeof(HP_block_info)), &block_info, sizeof(HP_block_info));
     BF_Block_SetDirty(block);
-    BF_UnpinBlock(block);
+    CALL_BF_NUM(BF_UnpinBlock(block));
 
     hp_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
    
@@ -178,7 +176,7 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
   
   int block_num;
   int last_record_block = 0;
-  BF_GetBlockCounter(fd, &block_num);
+  CALL_BF_NUM(BF_GetBlockCounter(fd, &block_num));
     
   for(int i=1; i<block_num; i++){
   
@@ -195,7 +193,7 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
         printRecord(rec[record]);
       }
     }
-    BF_UnpinBlock(block);
+    CALL_BF_NUM(BF_UnpinBlock(block));
   }
   BF_Block_Destroy(&block);
   return last_record_block;
