@@ -1,12 +1,37 @@
-Για την δημιουργία του εκτελέσιμου το οποίο δείχνει
-τις δυνατότητες της βιβλιοθήκης BF, τρέξτε την εντολή:
+Κ18 - Database Systems Implementation - Exercise 1
+Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
+----------------------------------------------------------------
 
-make bf;
+-> HP
+ - hp_file.h:
+    * stuct HP_info: is a struct for the data of the file, it contains the file type, file descriptor,
+                    the id of the last block and the capacity of the block.
+    * struct HP_block_info: is a struct for the metadata of a block, it contains the number of the records and 
+                            a pointer to the next block. 
+ - hp_file.c:
+    * we made 2 defines. The one returns null and the other -1, if the BF function executed incorrectly.
+    * HP_CreateFile: Create a file with fileName name, create and initialize the metadata and copy them on the first block of the file.
+    * HP_OpenFile: Get the first block and check if it's heap type, if it's not returnt null.
+    * HP_CloseFile: 
+    * HP_InsertEntry: Check if the last block ID is 0 (the first block of the file), make a new block and copy/?? or ??/place the record in the file
+                     and update the metadata of the block. If it's not get the last block and if there is space in itm place the record there and update the metadata.
+                     If the block is full, make a new block and place the record there with the metadata of the block.
+    * HP_GetAllEntries: take the number of blocks and for every block and every record of it, check if the request ID is the same as the record's. If yes print the record.
+ - hp_main: RECORDS_NUM = 594, is the maximum we can make without segmentation fault. :(
 
-Για να τρέξετε το εκτελέσιμο:
 
-./build/bf_main
+ -> HT
+ - ht_table.h:
+    * stuct HP_info: 
+    * struct HP_block_info: 
+ - ht_table.c:
+    * HT_CreateFile: 
+    * HT_OpenFile:
+    * HT_CloseFile:
+    * HT_InsertEntry:
+    * HT_GetAllEntries:
+ - ht_main.c
 
-Αντίστοιχα και για τα άλλα εκτελέσιμα.
-make ht;
-make hp;
+----------------------------------------------------------------
+**Further observations**
+segm fault
