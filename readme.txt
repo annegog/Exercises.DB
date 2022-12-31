@@ -10,10 +10,10 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
                             a pointer to the next block. 
  - hp_file.c:
     * we made 2 defines. The one returns null and the other -1, if the BF function executed incorrectly.
-    * HP_CreateFile: Create a file with fileName name, create and initialize the metadata and copy them on the first block of the file.
+    * HP_CreateFile: Create a file with fileName name, create a block and create and initialize the metadata, then copy them on the first block of the file.
     * HP_OpenFile: Get the first block and check if it's heap type, if it's not returnt null.
     * HP_CloseFile: 
-    * HP_InsertEntry: Check if the last block ID is 0 (the first block of the file), make a new block and copy/?? or ??/place the record in the file
+    * HP_InsertEntry: Check if the last block ID is 0 (the first block of the file), make a new block and copy/??or??/place the record in the file
                      and update the metadata of the block. If it's not get the last block and if there is space in itm place the record there and update the metadata.
                      If the block is full, make a new block and place the record there with the metadata of the block.
     * HP_GetAllEntries: take the number of blocks and for every block and every record of it, check if the request ID is the same as the record's. If yes print the record.
@@ -22,16 +22,17 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
 
  -> HT
  - ht_table.h:
-    * stuct HP_info: 
-    * struct HP_block_info: 
+    * stuct HP_info: is a struct for the data of the file it also contains the file type, file descriptor, the capacity of the records, the number of the buckets we are 
+                     going to use, a hash table, the number of the occupied positions in a hash table, the size of it and the ID of the last block.
+    * struct HP_block_info: it contains the number of the records in every block and the ID of the previous block.
  - ht_table.c:
-    * HT_CreateFile: 
-    * HT_OpenFile:
-    * HT_CloseFile:
-    * HT_InsertEntry:
+    * HT_CreateFile: Create a file with fileName name, create a block and initialize the metadata of the file.
+    * HT_OpenFile: Make space for the hash table, open the first block and check the file type.
+    * HT_CloseFile: 
+    * HT_InsertEntry: 
     * HT_GetAllEntries:
  - ht_main.c
 
 ----------------------------------------------------------------
 **Further observations**
-segm fault
+-
