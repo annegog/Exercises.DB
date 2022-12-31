@@ -30,9 +30,10 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
     * HT_OpenFile: Make space for the hash table, open the first block and check the file type.
     * HT_CloseFile: 
     * HT_InsertEntry: 
-    * HT_GetAllEntries:
- - ht_main.c
+    * HT_GetAllEntries: Get the number of the last block of the bucket, and for every block (from the last to the first) check if you find the record with the ID you're looking for. 
+                     If you find it print it and when the searching stops return the number of the blocks that you read.
+ - ht_main.c: RECORDS_NUM = 549 is also the maximum!
 
 ----------------------------------------------------------------
 **Further observations**
--
+- HT: can have more than 10 buckets, but not >=19
