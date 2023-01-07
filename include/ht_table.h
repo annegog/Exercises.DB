@@ -7,21 +7,20 @@
 
 typedef struct {
     // Να το συμπληρώσετε
-    char fileType[5];
-    int fileDesc;
-    long int numBuckets;
-    int capacityOfRecords;
-    int **hashTable; //πινακας κατακερματισμου
-    int occupiedPosInHT; //sizeOfHashTable; //
-    int sizeOfHT; 
-    int lastBlockID; //
+    char fileType[5]; //the type of file
+    int fileDesc; //the file descriptor of the file
+    long int numBuckets; //the number of buckets
+    int capacityOfRecords; //the capacity of records a block ha
+    int **hashTable; //hash table
+    int occupiedPosInHT; //the positions that are occupied from the hash table
+    int sizeOfHT; //size of hash table
+    int lastBlockID; //last block id of the file
 } HT_info;
 
 typedef struct {
     // Να το συμπληρώσετε
-    int numOfRecords;
-    int previousBlockId;
-    //Block* initialBlock; //ενα πινακα απο μπλοκς που να δειχνουν στις υπερχειλισεις!
+    int numOfRecords; //the number of records the block has
+    int previousBlockId; //id of the previous block
 } HT_block_info;
 
 /*Η συνάρτηση HT_CreateFile χρησιμοποιείται για τη δημιουργία

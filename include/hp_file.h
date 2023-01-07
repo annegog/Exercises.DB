@@ -6,15 +6,15 @@
 /* Η δομή HP_info κρατάει μεταδεδομένα που σχετίζονται με το αρχείο σωρού*/
 typedef struct {
     // Να το συμπληρώσετε
-    char fileType[5]; //γιατι θα κρατάμε heap/hash
-    int fileDesc;
-    int lastBlockID;
-    int numOfRecords ; //capacity
+    char fileType[5]; //the type of file
+    int fileDesc; //the file descriptor of the file
+    int lastBlockID; //the last block id of the file
+    int capacityOfRecords ; //the capacity of records a block has
 } HP_info;
 
 typedef struct {
-    int numOfRecords;
-    BF_Block* nextBlock;
+    int numOfRecords; //the number of records a block has
+    BF_Block* nextBlock; //pointer to the next block of the file
 } HP_block_info;
 
 /*Η συνάρτηση HP_CreateFile χρησιμοποιείται για τη δημιουργία και

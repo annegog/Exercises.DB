@@ -6,7 +6,7 @@
 #include "bf.h"
 #include "hp_file.h"
 
-#define RECORDS_NUM 594 //1000 // you can change it if you want
+#define RECORDS_NUM 594 //is the maximum records we can have without crashing our program 
 #define FILE_NAME "data.db"
 
 #define CALL_OR_DIE(call)     \
