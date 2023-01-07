@@ -124,8 +124,8 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
   data = BF_Block_GetData(block); 
 
   memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info)); 
-  //?????    // θα τα κανουμε αυτα offset? αλλιως να σβησουμε την μεταβλητη  
-  //else check if the block has empty space and write the record at the block
+                            // θα τα κανουμε αυτα offset? αλλιως να σβησουμε την μεταβλητη  
+
   if(block_info.numOfRecords < hp_info->capacityOfRecords){ //αν υπάρχει χώρος στο μπλοκ
     Record* rec = data;
     rec[block_info.numOfRecords++] = record; //βαλε στην ασχη του μλποκ το record

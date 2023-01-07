@@ -7,11 +7,20 @@
 
 
 typedef struct {
-    // Να το συμπληρώσετε
+    char fileType[5];
+    char fileName[10];
+    int fileDesc;
+    long int numBuckets;
+    int capacityOfRecords;
+    int **hashTable; //πινακας κατακερματισμου
+    int occupiedPosInHT; //sizeOfHashTable; //
+    int sizeOfHT; 
+    int lastBlockID; //
 } SHT_info;
 
 typedef struct {
-    // Να το συμπληρώσετε
+    int numOfRecords;
+    int previousBlockId;
 } SHT_block_info;
 
 /*Η συνάρτηση SHT_CreateSecondaryIndex χρησιμοποιείται για τη δημιουργία
