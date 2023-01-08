@@ -104,7 +104,7 @@ int HT_CloseFile( HT_info* ht_info ){
 
   memcpy(data, ht_info, sizeof(HT_info)); //and copy the struct at the data of the block
   BF_Block_SetDirty(block);
-  CALL_BF_NULL(BF_UnpinBlock(block));
+  CALL_BF_NUM(BF_UnpinBlock(block));
   BF_Block_Destroy(&block);
 
   //free the allocated memory of the hash table
@@ -248,6 +248,7 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   int bucket = value%numBuckets; //get the bucket that the record is placed
   
   //search the hash (from bottom to top) table and find the last block the bucket has
+  //printf("1.occ- %d\n2.siz- %d\n3.Buckets- %d\n", ht_info->occupiedPosInHT, ht_info->sizeOfHT, ht_info->numBuckets);
   for (int i=ht_info->occupiedPosInHT-1; i>=0; i--){
     if(ht_info->hashTable[i][0]==bucket){
       block_num=ht_info->hashTable[i][1];
@@ -286,17 +287,37 @@ int HashStatistics(char* filename /* όνομα του αρχείου που ε�
   BF_Block *block;
   BF_Block_Init(&block);
 
-  HT_info* ht_info = HT_OpenFile(filename);
+  //HT_info* ht_info = HT_OpenFile(filename);
+
+  int fd;
+  void* ht_info_data;
+  
+  CALL_BF_NUM(BF_OpenFile(filename, &fd)); //open file
+  CALL_BF_NUM(BF_GetBlock(fd, 0, block)); 
+  ht_info_data = BF_Block_GetData(block); //get the data of the fisrt block
+  
+  // HT_info *ht_info = malloc(sizeof(HT_info));
+  // memcpy( ht_info, data, sizeof(HT_info)); 
+  HT_info *ht_info = ht_info_data;
+  //εδω σκεφτηκα οτι μπορουμε κατευθειαν να δειξουμε στα data αφου δεν θα τα πειραξουμε και δεν
+  //θα κλεισουμε το block -οποτε δεν χρειαζομαστε το μαλλοκ
+
   printf("fileee type %s\n", ht_info->fileType);
   if(strcmp(ht_info->fileType, "hash") != 0 ) //if the file is hash type 
     return -1;
   printf("SKATAAAAAAAAAAAAAA 2\n");
 
-  int fd = ht_info->fileDesc;
-  printf("1 %d\n", ht_info->numBuckets);
-  printf("2 %d\n", ht_info->capacityOfRecords);
-  printf("3 %d\n", ht_info->sizeOfHT);
-  printf("4 %d\n", ht_info->occupiedPosInHT);
+  //int fd = ht_info->fileDesc;
+  printf("1 ht_info->numBuckets %d\n", ht_info->numBuckets);
+  printf("2 ht_info->capacityOfRecords %d\n", ht_info->capacityOfRecords);
+  printf("3 ht_info->sizeOfHT %d\n", ht_info->sizeOfHT);
+  printf("4 ht_info->occupiedPosInHT %d\n", ht_info->occupiedPosInHT);
+  printf("5 ht_info->fileDesc %d\n", ht_info->fileDesc);
+  printf("6 ht_info->fileType %s\n", ht_info->fileType);
+  printf("7 ht_info->lastBlockID %d\n", ht_info->lastBlockID);
+  //printf("8 ht_info->occupiedPosInHT %d\n", ht_info->);
+
+
   HT_block_info *block_info;
   int blockID;
   void* data;
@@ -315,8 +336,9 @@ int HashStatistics(char* filename /* όνομα του αρχείου που ε�
     
     CALL_BF_NUM(BF_GetBlock(fd,blockID,block));
     data = BF_Block_GetData(block);
+    printf("faaa!!\n");
     memcpy(&block_info, data+512-sizeof(HT_block_info), sizeof(HT_block_info));
-      printf("faaa %d\n", block_info->numOfRecords);
+    printf("faaa %d\n", block_info->numOfRecords);
 
     recordsOfBuckets[ht_info->hashTable[i][0]] += block_info->numOfRecords;
     blocksOfBuckets[ht_info->hashTable[i][0]]++;
@@ -350,8 +372,9 @@ int HashStatistics(char* filename /* όνομα του αρχείου που ε�
   }
   printf("The buckets with overflowed blockes are: %d\n", overflowedBuckets);
   
-  CALL_BF_NULL(BF_UnpinBlock(block));
+  CALL_BF_NUM(BF_UnpinBlock(block));
   BF_Block_Destroy(&block);
-  HT_CloseFile(ht_info);
+  //HT_CloseFile(ht_info);
+  CALL_BF_NUM(BF_CloseFile(fd));
   return 0;
 }
