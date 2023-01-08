@@ -36,6 +36,7 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
                      If you find it print it and when the searching stops return the number of the blocks that you read.
  - ht_main.c: RECORDS_NUM = 549 is also the maximum!
 
+-> HashStatistics: 
 
 -> SHT
  - sht_table.h:

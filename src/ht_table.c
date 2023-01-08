@@ -67,8 +67,11 @@ HT_info* HT_OpenFile(char *fileName){
   CALL_BF_NULL(BF_OpenFile(fileName, &fd)); //open file
   CALL_BF_NULL(BF_GetBlock(fd, 0, block)); 
   data = BF_Block_GetData(block); //get the data of the fisrt block
+  
+  // HT_info *info=data;
+  HT_info *info = malloc(sizeof(HT_info));
+  memcpy( info, data, sizeof(HT_info)); 
 
-  HT_info *info=data;
   info->fileDesc = fd;  //write at the struct the file descriptor that is being used
   //and allocate the memory for the hash table
   info->hashTable=(int **)malloc(info->numBuckets*sizeof(int *));
@@ -90,15 +93,27 @@ HT_info* HT_OpenFile(char *fileName){
 }
 
 
-int HT_CloseFile( HT_info* HT_info ){
-  int fd=HT_info->fileDesc; //find the file descriptor of the file
-  
+int HT_CloseFile( HT_info* ht_info ){
+  BF_Block *block;
+  BF_Block_Init(&block);
+  void* data;
+  int fd=ht_info->fileDesc; //find the file descriptor of the file
+
+  BF_GetBlock(fd, 0, block);
+  data = BF_Block_GetData(block); 
+
+  memcpy(data, ht_info, sizeof(HT_info)); //and copy the struct at the data of the block
+  BF_Block_SetDirty(block);
+  CALL_BF_NULL(BF_UnpinBlock(block));
+  BF_Block_Destroy(&block);
+
   //free the allocated memory of the hash table
-  for (int i=0; i<HT_info->sizeOfHT; i++)
+  for (int i=0; i<ht_info->sizeOfHT; i++)
   {
-    free(HT_info->hashTable[i]);
+    free(ht_info->hashTable[i]);
   }
-  free(HT_info->hashTable);
+  free(ht_info->hashTable);
+  free(ht_info);
 
   CALL_BF_NUM(BF_CloseFile(fd)); //and close the file
   return 0;
@@ -265,4 +280,78 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   
   BF_Block_Destroy(&block);
   return block_counter; //return the block you read
+}
+
+int HashStatistics(char* filename /* όνομα του αρχείου που ενδιαφέρει */ ){
+  BF_Block *block;
+  BF_Block_Init(&block);
+
+  HT_info* ht_info = HT_OpenFile(filename);
+  printf("fileee type %s\n", ht_info->fileType);
+  if(strcmp(ht_info->fileType, "hash") != 0 ) //if the file is hash type 
+    return -1;
+  printf("SKATAAAAAAAAAAAAAA 2\n");
+
+  int fd = ht_info->fileDesc;
+  printf("1 %d\n", ht_info->numBuckets);
+  printf("2 %d\n", ht_info->capacityOfRecords);
+  printf("3 %d\n", ht_info->sizeOfHT);
+  printf("4 %d\n", ht_info->occupiedPosInHT);
+  HT_block_info *block_info;
+  int blockID;
+  void* data;
+  
+  printf("Number of blocks in file %s: %d\n", filename, ht_info->occupiedPosInHT);
+ 
+  int recordsOfBuckets[ht_info->numBuckets];
+  int blocksOfBuckets[ht_info->numBuckets];
+  for (int i=0; i<ht_info->numBuckets; i++){
+    recordsOfBuckets[i] = 0;
+    blocksOfBuckets[i] = 0;
+  }
+
+  for (int i=0; i<ht_info->occupiedPosInHT; i++){
+    blockID = ht_info->hashTable[i][1];
+    
+    CALL_BF_NUM(BF_GetBlock(fd,blockID,block));
+    data = BF_Block_GetData(block);
+    memcpy(&block_info, data+512-sizeof(HT_block_info), sizeof(HT_block_info));
+      printf("faaa %d\n", block_info->numOfRecords);
+
+    recordsOfBuckets[ht_info->hashTable[i][0]] += block_info->numOfRecords;
+    blocksOfBuckets[ht_info->hashTable[i][0]]++;
+  }
+
+  int min = 1000;
+  int max = 0;
+  int total_records = 0;
+  int total_blocks = 0;
+  for (int i=0; i<ht_info->numBuckets; i++){
+    if(recordsOfBuckets[i] < min)
+      min = recordsOfBuckets[i];
+
+    if(recordsOfBuckets[i] > max)
+      max = recordsOfBuckets[i];
+    
+    total_records += recordsOfBuckets[i];
+    total_blocks += blocksOfBuckets[i];
+  }
+  printf("Minimum records are: %d\n", min);
+  printf("Maximum records are: %d\n", max);
+  printf("Mean records are: %ld\n", total_records/ht_info->numBuckets);
+  printf("Mean blocks are: %ld\n", total_blocks/ht_info->numBuckets);
+
+  int overflowedBuckets = 0;
+  for(int i=0; i<ht_info->numBuckets; i++){
+    if(blocksOfBuckets[i] > 1){
+      printf("The bucket %d has %d overflowed blocks\n", i, blocksOfBuckets[i]-1);
+      overflowedBuckets++;
+    }
+  }
+  printf("The buckets with overflowed blockes are: %d\n", overflowedBuckets);
+  
+  CALL_BF_NULL(BF_UnpinBlock(block));
+  BF_Block_Destroy(&block);
+  HT_CloseFile(ht_info);
+  return 0;
 }
