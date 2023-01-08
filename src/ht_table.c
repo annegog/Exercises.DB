@@ -114,7 +114,6 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   int fd=ht_info->fileDesc;
   long int numBuckets = ht_info->numBuckets;
   int bucket = record.id%numBuckets; //the bucket that the record must be written
-  int offset=512-sizeof(HT_block_info);
   int blockId; 
   int check=0;
 
@@ -154,7 +153,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     
     block_info.numOfRecords = 1;
     block_info.previousBlockId = 0;
-    memcpy(data+offset, &block_info, sizeof(HT_block_info));
+    memcpy(data+512-sizeof(HT_block_info), &block_info, sizeof(HT_block_info));
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
 
@@ -166,20 +165,19 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     BF_Block_Destroy(&block);
 
     return ht_info->lastBlockID;
-    
   }
 
   //else get the data of the block
   CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
   data = BF_Block_GetData(block); 
 
-  memcpy(&block_info, data+offset, sizeof(HT_block_info));
+  memcpy(&block_info, data+512-sizeof(HT_block_info), sizeof(HT_block_info));
 
   //if the block has empty space then write the record at the block
   if(block_info.numOfRecords < ht_info->capacityOfRecords){
     Record* rec = data;
     rec[block_info.numOfRecords++] = record; //βαλε στην ασχη του μλποκ το record
-    memcpy(data+offset, &block_info, sizeof(HT_block_info)); // και στο τελος ενημερωσε το bock info
+    memcpy(data+512-sizeof(HT_block_info), &block_info, sizeof(HT_block_info)); // και στο τελος ενημερωσε το bock info
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
 
@@ -195,7 +193,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     void* new_data;
 
     BF_Block_Init(&new_block);
-    CALL_BF_NUM(BF_AllocateBlock(fd, new_block)); //φτιάξε καινουριο μπλοκ
+    CALL_BF_NUM(BF_AllocateBlock(fd, new_block)); 
     new_data = BF_Block_GetData(new_block);
 
     Record* rec = new_data;
@@ -208,7 +206,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     BF_Block_SetDirty(new_block);
     CALL_BF_NUM(BF_UnpinBlock(new_block));
 
-    memcpy(data+offset, &block_info, sizeof(HT_block_info));
+    memcpy(data+512-sizeof(HT_block_info), &block_info, sizeof(HT_block_info));
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
 

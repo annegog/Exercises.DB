@@ -96,8 +96,6 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
   int id_of_last_block = hp_info->lastBlockID;
   int fd = hp_info->fileDesc;
 
-  int offset=512-sizeof(HP_block_info);
-
   //if the block 0 is the last block then allocate a new
   //block and write there the record
   if(id_of_last_block == 0){
@@ -109,7 +107,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     
     block_info.numOfRecords = 1;
     block_info.nextBlock = NULL;
-    memcpy(data+offset, &block_info, sizeof(HP_block_info));
+    memcpy(data+512-sizeof(HP_block_info), &block_info, sizeof(HP_block_info));
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
 
@@ -124,12 +122,12 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
   data = BF_Block_GetData(block); 
 
   memcpy(&block_info, data+(512-sizeof(HP_block_info)), sizeof(HP_block_info)); 
-                            // θα τα κανουμε αυτα offset? αλλιως να σβησουμε την μεταβλητη  
-
-  if(block_info.numOfRecords < hp_info->capacityOfRecords){ //αν υπάρχει χώρος στο μπλοκ
+                             
+  //if the block has empty space then write the record at the block
+  if(block_info.numOfRecords < hp_info->capacityOfRecords){ 
     Record* rec = data;
-    rec[block_info.numOfRecords++] = record; //βαλε στην ασχη του μλποκ το record
-    memcpy(data+offset, &block_info, sizeof(HP_block_info)); // και στο τελος ενημερωσε το bock info
+    rec[block_info.numOfRecords++] = record;
+    memcpy(data+512-sizeof(HP_block_info), &block_info, sizeof(HP_block_info)); 
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
 
