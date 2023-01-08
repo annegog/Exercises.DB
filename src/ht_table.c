@@ -266,7 +266,3 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   BF_Block_Destroy(&block);
   return block_counter; //return the block you read
 }
-
-
-
-
