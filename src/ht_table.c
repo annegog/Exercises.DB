@@ -42,7 +42,7 @@ int HT_CreateFile(char *fileName,  int buckets){
   info.numBuckets=buckets; //the number of buckets
   
   //allocate the first block of the file
-  CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
+  CALL_BF_NUM(BF_AllocateBlock(fd, block));  
   data = BF_Block_GetData(block); 
   memcpy(data, &info, sizeof(HT_info)); //and copy the struct at the data of the block
 
@@ -51,7 +51,7 @@ int HT_CreateFile(char *fileName,  int buckets){
   CALL_BF_NUM(BF_UnpinBlock(block));
   
   //close the file
-  CALL_BF_NUM(BF_CloseFile(fd)); //Κλείσιμο αρχείου και αποδέσμευση μνήμης
+  CALL_BF_NUM(BF_CloseFile(fd)); 
   BF_Block_Destroy(&block);
 
   return 0;
@@ -142,11 +142,11 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   }
 
   //if the flag "check" is 0 that means that the specific bucket has no blocks
-  //so we must allocate a block and inform properly the has table
+  //so we must allocate a block and update properly the has table
   if (check==0)
   {    
-    CALL_BF_NUM(BF_AllocateBlock(fd, block)); //φτιαξε καινουριο μπλοκ
-    data = BF_Block_GetData(block); //και φερτο στην ενδιαεση μνημη
+    CALL_BF_NUM(BF_AllocateBlock(fd, block));
+    data = BF_Block_GetData(block);
    
     Record* rec = data;
     rec[0] = record;
@@ -157,7 +157,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
 
-    ht_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
+    ht_info->lastBlockID++;
     ht_info->hashTable[ht_info->occupiedPosInHT][0] = bucket;
     ht_info->hashTable[ht_info->occupiedPosInHT][1] = ht_info->lastBlockID;
     ht_info->occupiedPosInHT++;
@@ -176,8 +176,8 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   //if the block has empty space then write the record at the block
   if(block_info.numOfRecords < ht_info->capacityOfRecords){
     Record* rec = data;
-    rec[block_info.numOfRecords++] = record; //βαλε στην ασχη του μλποκ το record
-    memcpy(data+512-sizeof(HT_block_info), &block_info, sizeof(HT_block_info)); // και στο τελος ενημερωσε το bock info
+    rec[block_info.numOfRecords++] = record; 
+    memcpy(data+512-sizeof(HT_block_info), &block_info, sizeof(HT_block_info)); 
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
 
@@ -186,7 +186,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     return blockId;
   }
   //else allocate a new block and write the record at the new block 
-  //also inform(<-??) the hash table
+  //also update the hash table
   else{
     BF_Block *new_block;
     HT_block_info new_block_info;
@@ -210,7 +210,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
 
-    ht_info->lastBlockID++; //αυξησε κατα 1 id του τελευταιου μπλοκ
+    ht_info->lastBlockID++;
     ht_info->hashTable[ht_info->occupiedPosInHT][0] = bucket;
     ht_info->hashTable[ht_info->occupiedPosInHT][1] = ht_info->lastBlockID;
     ht_info->occupiedPosInHT++;
@@ -229,10 +229,10 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   int fd = ht_info->fileDesc;  
   void* data;
   int block_num;
-  long int numBuckets = ht_info->numBuckets;
-  int bucket = value%numBuckets;
+  long int numBuckets = ht_info->numBuckets; 
+  int bucket = value%numBuckets; //get the bucket that the record is placed
   
-  //????-> μηπως πρεπει να ελεγχουμε ολα τα blocks tou bucket??
+  //search the hash (from bottom to top) table and find the last block the bucket has
   for (int i=ht_info->occupiedPosInHT-1; i>=0; i--){
     if(ht_info->hashTable[i][0]==bucket){
       block_num=ht_info->hashTable[i][1];
@@ -243,6 +243,7 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   HT_block_info *block_info;
   int block_counter=0;
   
+
   do{
     CALL_BF_NUM(BF_GetBlock(fd,block_num,block));
     data = BF_Block_GetData(block);
@@ -250,18 +251,20 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
     Record* rec = data;    
     block_info = data+(512-sizeof(HT_block_info));
 
+    //check every record in the block 
     for (int record=0; record < block_info->numOfRecords; record++){
-      if(rec[record].id == value){
-        printRecord(rec[record]);
+      if(rec[record].id == value){ //if you find the record with the specific value
+        printRecord(rec[record]); //print the record
       }
     }
-    block_counter++;
+    block_counter++; //count the blocks we have read
     CALL_BF_NUM(BF_UnpinBlock(block));
 
   } while(( block_num = block_info->previousBlockId ) != 0);
+  //get the previous block of the bucket and check again
   
   BF_Block_Destroy(&block);
-  return block_counter;
+  return block_counter; //return the block you read
 }
 
 
