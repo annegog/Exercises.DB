@@ -1,4 +1,4 @@
-Κ18 - Database Systems Implementation - Exercise 1
+Κ18 - Database Systems Implementation - Exercise 1, 2
 Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
 ----------------------------------------------------------------
 
@@ -20,11 +20,11 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
  - hp_main: RECORDS_NUM = 594, is the maximum we can make without segmentation fault. :(
 
 
- -> HT
+-> HT
  - ht_table.h:
-    * stuct HP_info: is a struct for the data of the file it also contains the file type, file descriptor, the capacity of the records, the number of the buckets we are 
+    * stuct HT_info: is a struct for the data of the file it also contains the file type, file descriptor, the capacity of the records, the number of the buckets we are 
                      going to use, a hash table, the number of the occupied positions in a hash table, the size of it and the ID of the last block.
-    * struct HP_block_info: it contains the number of the records in every block and the ID of the previous block.
+    * struct HT_block_info: it contains the number of the records in every block and the ID of the previous block.
  - ht_table.c:
     * HT_CreateFile: Create a file with fileName name, create a block and initialize the metadata of the file.
     * HT_OpenFile: Make space for the hash table, open the first block and check the file type.
@@ -33,6 +33,19 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
     * HT_GetAllEntries: Get the number of the last block of the bucket, and for every block (from the last to the first) check if you find the record with the ID you're looking for. 
                      If you find it print it and when the searching stops return the number of the blocks that you read.
  - ht_main.c: RECORDS_NUM = 549 is also the maximum!
+
+
+-> SHT
+ - sht_table.h:
+    * struct SHT_block_info:
+ - sht_table.c:
+    * SHT_CreateSecondaryIndex:
+    * SHT_OpenSecondaryIndex: 
+    * SHT_CloseSecondaryIndex: 
+    * SHT_SecondaryInsertEntry: 
+    * SHT_SecondaryGetAllEntries: 
+ - sht_main.c: 
+
 
 ----------------------------------------------------------------
 **Further observations**
