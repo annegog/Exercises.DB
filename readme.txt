@@ -13,8 +13,8 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
     * HP_CreateFile: Create a file with fileName name, create a block and create and initialize the metadata, then copy them on the first block of the file.
     * HP_OpenFile: Get the first block and check if it's heap type, if it's not returnt null.
     * HP_CloseFile: 
-    * HP_InsertEntry: Check if the last block ID is 0 (the first block of the file), make a new block and copy/??or??/place the record in the file
-                     and update the metadata of the block. If it's not get the last block and if there is space in itm place the record there and update the metadata.
+    * HP_InsertEntry: Check if the last block ID is 0 (the first block of the file), make a new block and place the record in the file
+                     and update the metadata of the block. If it's not get the last block and if there is space in it place the record there and update the metadata.
                      If the block is full, make a new block and place the record there with the metadata of the block.
     * HP_GetAllEntries: take the number of blocks and for every block and every record of it, check if the request ID is the same as the record's. If yes print the record.
  - hp_main: RECORDS_NUM = 594, is the maximum we can make without segmentation fault. :(
@@ -28,8 +28,10 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
  - ht_table.c:
     * HT_CreateFile: Create a file with fileName name, create a block and initialize the metadata of the file.
     * HT_OpenFile: Make space for the hash table, open the first block and check the file type.
-    * HT_CloseFile: 
-    * HT_InsertEntry: 
+    * HT_CloseFile: Free the memory of the hash table and close the file.
+    * HT_InsertEntry: If you reach the maximum size of the hash table reallocate memory. Find the last block of the bucket,
+                     if there are no blocks in it make a new one and put the record. Else get the data of the block, 
+                     if the block is empty place the record on the block, else make a new one.
     * HT_GetAllEntries: Get the number of the last block of the bucket, and for every block (from the last to the first) check if you find the record with the ID you're looking for. 
                      If you find it print it and when the searching stops return the number of the blocks that you read.
  - ht_main.c: RECORDS_NUM = 549 is also the maximum!
