@@ -64,10 +64,9 @@ int HT_CreateFile(char *fileName,  int buckets){
 HT_info* HT_OpenFile(char *fileName){
   BF_Block *block;
   BF_Block_Init(&block);
-
   int fd;
   void* data;
-  printf("1\n");
+
   CALL_BF_NULL(BF_OpenFile(fileName, &fd)); //open file
   CALL_BF_NULL(BF_GetBlock(fd, 0, block)); 
   data = BF_Block_GetData(block); //get the data of the fisrt block
@@ -135,7 +134,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
 
   if(blockId==-1) //the bucket has no block
   {
-    printf("blockid %d\n", blockId);
+    // printf("blockid %d\n", blockId);
     //allocate one
     //and place the record there
     CALL_BF_NUM(BF_AllocateBlock(fd, block));
@@ -151,18 +150,18 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     CALL_BF_NUM(BF_UnpinBlock(block));
 
     ht_info->hashTable[bucket]= ++(ht_info->lastBlockID);
-    printf("ht_info->hashTable[bucket] %d\n", ht_info->hashTable[bucket]);
+    // printf("ht_info->hashTable[bucket] %d\n", ht_info->hashTable[bucket]);
     BF_Block_Destroy(&block);
 
     return ht_info->lastBlockID;
   }
   //else
-  printf("1-blockid %d\n", blockId);
+  // printf("1-blockid %d\n", blockId);
   CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
   data = BF_Block_GetData(block);
 
   memcpy(&block_info, data+512-sizeof(HT_block_info), sizeof(HT_block_info));
-  printf("block_info.nextBlockId %d\n ",block_info.nextBlockId );
+  // printf("block_info.nextBlockId %d\n ",block_info.nextBlockId );
   while(block_info.nextBlockId != -1)
   {
     blockId=block_info.nextBlockId;
@@ -204,7 +203,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     new_block_info.previousBlockId = blockId; 
     new_block_info.nextBlockId = -1;
     block_info.nextBlockId = ++(ht_info->lastBlockID);
-    printf("WHEN THERE IS NO SPACE -- block_info.nextBlockId %d\n",block_info.nextBlockId);
+    // printf("WHEN THERE IS NO SPACE -- block_info.nextBlockId %d\n",block_info.nextBlockId);
     memcpy(new_data+(512-sizeof(HT_block_info)), &new_block_info, sizeof(HT_block_info));
 
     BF_Block_SetDirty(new_block);
@@ -220,32 +219,50 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     return ht_info->lastBlockID;
   }
 }
-/*
+
 int HT_GetAllEntries(HT_info* ht_info, int value ){
   BF_Block *block;
   BF_Block_Init(&block);
 
   int fd = ht_info->fileDesc;  
   void* data;
-  int block_num;
+  int block_num = 0;
   long int numBuckets = ht_info->numBuckets; 
   int bucket = value%numBuckets; //get the bucket that the record is placed
-  
-  //search the hash (from bottom to top) table and find the last block the bucket has
-  //printf("1.occ- %d\n2.siz- %d\n3.Buckets- %d\n", ht_info->occupiedPosInHT, ht_info->sizeOfHT, ht_info->numBuckets);
-  for (int i=ht_info->occupiedPosInHT-1; i>=0; i--){
-    if(ht_info->hashTable[i][0]==bucket){
-      block_num=ht_info->hashTable[i][1];
-      break;
-    }
-  }
 
   HT_block_info *block_info;
   int block_counter=0;
   
+  // search the hash (from bottom to top) table and find the last block the bucket has
+  // for (int i=ht_info->occupiedPosInHT-1; i>=0; i--){
+  //   if(ht_info->hashTable[i][0]==bucket){
+  //     block_num=ht_info->hashTable[i][1];
+  //     break;
+  //   }
+  // }
+  // do{
+  //   CALL_BF_NUM(BF_GetBlock(fd,block_num,block));
+  //   data = BF_Block_GetData(block);
 
-  do{
-    CALL_BF_NUM(BF_GetBlock(fd,block_num,block));
+  //   Record* rec = data;    
+  //   block_info = data+(512-sizeof(HT_block_info));
+
+  //   //check every record in the block 
+  //   for (int record=0; record < block_info->numOfRecords; record++){
+  //     if(rec[record].id == value){ //if you find the record with the specific value
+  //       printRecord(rec[record]); //print the record
+  //     }
+  //   }
+  //   block_counter++; //count the blocks we have read
+  //   CALL_BF_NUM(BF_UnpinBlock(block));
+
+  // } while(( block_num = block_info->previousBlockId ) != -1);
+  // //get the previous block of the bucket and check again
+  
+  // nomizw oti to lastBLockID den einai swstoooooo !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  for (int i = ht_info->hashTable[bucket]; i < ht_info->lastBlockID; i++){
+    /* code */
+    CALL_BF_NUM(BF_GetBlock(fd,i,block));
     data = BF_Block_GetData(block);
 
     Record* rec = data;    
@@ -259,15 +276,14 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
     }
     block_counter++; //count the blocks we have read
     CALL_BF_NUM(BF_UnpinBlock(block));
+  }
 
-  } while(( block_num = block_info->previousBlockId ) != 0);
-  //get the previous block of the bucket and check again
-  
   BF_Block_Destroy(&block);
   return block_counter; //return the block you read
 }
 
-int HashStatistics(char* filename /* όνομα του αρχείου που ενδιαφέρει  ){
+
+int HashStatistics(char* filename /*όνομα του αρχείου που ενδιαφέρει */ ){
   BF_Block *block;
   BF_Block_Init(&block);
 
@@ -283,32 +299,24 @@ int HashStatistics(char* filename /* όνομα του αρχείου που ε�
   // HT_info *ht_info = malloc(sizeof(HT_info));
   // memcpy( ht_info, ht_info_data, sizeof(HT_info)); 
   HT_info *ht_info = ht_info_data;
-   printf("here\n");
-  printf(" ht_info->hashTable[0][0] %d\n", ht_info->hashTable[0][0]);
   //εδω σκεφτηκα οτι μπορουμε κατευθειαν να δειξουμε στα data αφου δεν θα τα πειραξουμε και δεν
   //θα κλεισουμε το block -οποτε δεν χρειαζομαστε το μαλλοκ
 
-  printf("fileee type %s\n", ht_info->fileType);
+  printf(">> file type %s\n", ht_info->fileType);
   if(strcmp(ht_info->fileType, "hash") != 0 ) //if the file is hash type 
     return -1;
-  printf("SKATAAAAAAAAAAAAAA 2\n");
 
   //int fd = ht_info->fileDesc;
   printf("1 ht_info->numBuckets %d\n", ht_info->numBuckets);
   printf("2 ht_info->capacityOfRecords %d\n", ht_info->capacityOfRecords);
-  printf("3 ht_info->sizeOfHT %d\n", ht_info->sizeOfHT);
-  printf("4 ht_info->occupiedPosInHT %d\n", ht_info->occupiedPosInHT);
   printf("5 ht_info->fileDesc %d\n", ht_info->fileDesc);
   printf("6 ht_info->fileType %s\n", ht_info->fileType);
   printf("7 ht_info->lastBlockID %d\n", ht_info->lastBlockID);
-  //printf("8 ht_info->occupiedPosInHT %d\n", ht_info->);
-
 
   HT_block_info *block_info;
   int blockID;
   void* data;
   
-  printf("Number of blocks in file %s: %d\n", filename, ht_info->occupiedPosInHT);
  
   int recordsOfBuckets[ht_info->numBuckets];
   int blocksOfBuckets[ht_info->numBuckets];
@@ -317,19 +325,14 @@ int HashStatistics(char* filename /* όνομα του αρχείου που ε�
     recordsOfBuckets[i] = 0;
     blocksOfBuckets[i] = 0;
   }
-   printf("123\n");
+
   for (int i=0; i<ht_info->occupiedPosInHT; i++){
-     printf("456\n");
-     printf(" ht_info->hashTable[i][1] %d\n", ht_info->hashTable[i][1]);
+    printf(" ht_info->hashTable[i][1] %d\n", ht_info->hashTable[i][1]);
+    
     blockID = ht_info->hashTable[i][1];
-    printf("a\n");
     CALL_BF_NUM(BF_GetBlock(fd,blockID,block));
-    printf("b\n");
     data = BF_Block_GetData(block);
-    printf("c\n");
-    printf("faaa!!\n");
     memcpy(&block_info, data+512-sizeof(HT_block_info), sizeof(HT_block_info));
-    printf("faaa %d\n", block_info->numOfRecords);
 
     recordsOfBuckets[ht_info->hashTable[i][0]] += block_info->numOfRecords;
     blocksOfBuckets[ht_info->hashTable[i][0]]++;
@@ -369,5 +372,3 @@ int HashStatistics(char* filename /* όνομα του αρχείου που ε�
   CALL_BF_NUM(BF_CloseFile(fd));
   return 0;
 }
-
-*/

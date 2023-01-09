@@ -3,8 +3,6 @@
 #include <record.h>
 
 
-
-
 typedef struct {
     // Να το συμπληρώσετε
     char fileType[5]; //the type of file

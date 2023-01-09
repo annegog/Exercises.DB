@@ -34,7 +34,7 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
                      if the block is empty place the record on the block, else make a new one.
     * HT_GetAllEntries: Get the number of the last block of the bucket, and for every block (from the last to the first) check if you find the record with the ID you're looking for. 
                      If you find it print it and when the searching stops return the number of the blocks that you read.
- - ht_main.c: RECORDS_NUM = 549 is also the maximum!
+ - ht_main.c: RECORDS_NUM = 619 is also the maximum!
 
 -> HashStatistics: 
 
@@ -52,4 +52,8 @@ Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
 
 ----------------------------------------------------------------
 **Further observations**
-- HT: can have more than 10 buckets, but not >=19
+- HT: 
+   - 10 buckets with maximum 619 RECORDS_NUM (BF Error: BF memory is full)
+   - 30 buckets with maximum 759 RECORDS_NUM
+   - 50 buckets with maximum 699 RECORDS_NUM
+   - 20 buckets with maximum 639 RECORDS_NUM
