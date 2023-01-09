@@ -31,12 +31,12 @@ int main() {
     record = randomRecord();
     HT_InsertEntry(info, record);
   }
-
+/*
   printf("RUN PrintAllEntries\n");
   int id = rand() % RECORDS_NUM;
   HT_GetAllEntries(info, id);
-
+*/
   HT_CloseFile(info);
-  HashStatistics(FILE_NAME);
+  //HashStatistics(FILE_NAME);
   BF_Close();
 }

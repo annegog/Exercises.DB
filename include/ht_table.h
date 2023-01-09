@@ -11,9 +11,7 @@ typedef struct {
     int fileDesc; //the file descriptor of the file
     long int numBuckets; //the number of buckets
     int capacityOfRecords; //the capacity of records a block ha
-    int **hashTable; //hash table
-    int occupiedPosInHT; //the positions that are occupied from the hash table
-    int sizeOfHT; //size of hash table
+    int *hashTable; //hash table
     int lastBlockID; //last block id of the file
 } HT_info;
 
@@ -21,6 +19,7 @@ typedef struct {
     // Να το συμπληρώσετε
     int numOfRecords; //the number of records the block has
     int previousBlockId; //id of the previous block
+    int nextBlockId;
 } HT_block_info;
 
 /*Η συνάρτηση HT_CreateFile χρησιμοποιείται για τη δημιουργία
