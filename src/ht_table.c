@@ -44,7 +44,7 @@ int HT_CreateFile(char *fileName,  int buckets){
   //////////////////////////////
   //γινεται να φτιαξουμε εδω το hash table?
   ////////////////////////////////
-
+  info.lastBlockID=0;
   //allocate the first block of the file
   CALL_BF_NUM(BF_AllocateBlock(fd, block));  
   data = BF_Block_GetData(block); 
@@ -67,18 +67,17 @@ HT_info* HT_OpenFile(char *fileName){
 
   int fd;
   void* data;
-  
+  printf("1\n");
   CALL_BF_NULL(BF_OpenFile(fileName, &fd)); //open file
   CALL_BF_NULL(BF_GetBlock(fd, 0, block)); 
   data = BF_Block_GetData(block); //get the data of the fisrt block
-  
   // HT_info *info=data;
  
   HT_info *info = malloc(sizeof(HT_info));
   memcpy( info, data, sizeof(HT_info)); 
   info->fileDesc = fd;  //write at the struct the file descriptor that is being used
   //and allocate the memory for the hash table
-  info->hashTable=(int *)(info->numBuckets*sizeof(int));
+  info->hashTable=(int *)malloc(info->numBuckets*sizeof(int));
   for(int i=-0; i<info->numBuckets; i++)
     info->hashTable[i]=-1;//initialize to -1
   //   //??mhpws na elegxoyme an ontws gientai to malloc
@@ -90,7 +89,6 @@ HT_info* HT_OpenFile(char *fileName){
 
   if(strcmp(info->fileType, "hash") ==0 ) //if the file is hash type 
     return info; //return the struct info
-  
   return NULL; //else return NULL
 }
 
@@ -132,10 +130,12 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   int fd=ht_info->fileDesc;
   long int numBuckets = ht_info->numBuckets;
   int bucket = record.id%numBuckets; //the bucket that the record must be written
+  
   int blockId = ht_info->hashTable[bucket]; 
 
   if(blockId==-1) //the bucket has no block
   {
+    printf("blockid %d\n", blockId);
     //allocate one
     //and place the record there
     CALL_BF_NUM(BF_AllocateBlock(fd, block));
@@ -151,22 +151,22 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     CALL_BF_NUM(BF_UnpinBlock(block));
 
     ht_info->hashTable[bucket]= ++(ht_info->lastBlockID);
-
+    printf("ht_info->hashTable[bucket] %d\n", ht_info->hashTable[bucket]);
     BF_Block_Destroy(&block);
 
     return ht_info->lastBlockID;
   }
   //else
-
+  printf("1-blockid %d\n", blockId);
   CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
-  data = BF_Block_GetData(block); 
+  data = BF_Block_GetData(block);
 
   memcpy(&block_info, data+512-sizeof(HT_block_info), sizeof(HT_block_info));
-  
+  printf("block_info.nextBlockId %d\n ",block_info.nextBlockId );
   while(block_info.nextBlockId != -1)
   {
     blockId=block_info.nextBlockId;
-
+   // printf("--blockid %d\n", blockId);
     CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
     data = BF_Block_GetData(block); 
 
@@ -202,7 +202,9 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
 
     new_block_info.numOfRecords=1;
     new_block_info.previousBlockId = blockId; 
-    new_block_info.nextBlockId = ++(ht_info->lastBlockID);
+    new_block_info.nextBlockId = -1;
+    block_info.nextBlockId = ++(ht_info->lastBlockID);
+    printf("WHEN THERE IS NO SPACE -- block_info.nextBlockId %d\n",block_info.nextBlockId);
     memcpy(new_data+(512-sizeof(HT_block_info)), &new_block_info, sizeof(HT_block_info));
 
     BF_Block_SetDirty(new_block);
