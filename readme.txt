@@ -2,6 +2,16 @@
 Atalanti Papadaki (1115201800148) - Annna Gogoula (115201800305)
 ----------------------------------------------------------------
 
+make bf
+./build/bf_main
+
+make ht
+./build/ht_main
+
+make sht
+./build/sht_main
+
+----------------------------------------------------------------
 -> HP
  - hp_file.h:
     * stuct HP_info: is a struct for the data of the file, it contains the file type, file descriptor,
