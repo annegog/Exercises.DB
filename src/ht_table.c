@@ -259,9 +259,11 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   // } while(( block_num = block_info->previousBlockId ) != -1);
   // //get the previous block of the bucket and check again
   
+
+  //
+  //
   // nomizw oti to lastBLockID den einai swstoooooo !!!!!!!!!!!!!!!!!!!!!!!!!!!!
   for (int i = ht_info->hashTable[bucket]; i < ht_info->lastBlockID; i++){
-    /* code */
     CALL_BF_NUM(BF_GetBlock(fd,i,block));
     data = BF_Block_GetData(block);
 
@@ -278,6 +280,24 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
     CALL_BF_NUM(BF_UnpinBlock(block));
   }
 
+  // do{
+  //   CALL_BF_NUM(BF_GetBlock(fd,block_num,block));
+  //   data = BF_Block_GetData(block);
+
+  //   Record* rec = data;    
+  //   block_info = data+(512-sizeof(HT_block_info));
+
+  //   //check every record in the block 
+  //   for (int record=0; record < block_info->numOfRecords; record++){
+  //     if(rec[record].id == value){ //if you find the record with the specific value
+  //       printRecord(rec[record]); //print the record
+  //     }
+  //   }
+  //   block_counter++; //count the blocks we have read
+  //   CALL_BF_NUM(BF_UnpinBlock(block));
+  // } while ((block_num = block_info->nextBlockId) != -1);
+
+ 
   BF_Block_Destroy(&block);
   return block_counter; //return the block you read
 }

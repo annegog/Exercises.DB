@@ -12,14 +12,13 @@ typedef struct {
     int fileDesc;
     long int numBuckets;
     int capacityOfRecords;
-    int **hashTable; //πινακας κατακερματισμου
-    int occupiedPosInHT; //sizeOfHashTable; //
-    int sizeOfHT; 
+    int *hashTable; //πινακας κατακερματισμου
     int lastBlockID; //
 } SHT_info;
 
 typedef struct {
     int numOfRecords;
+    int nextBlockId;
     int previousBlockId;
 } SHT_block_info;
 

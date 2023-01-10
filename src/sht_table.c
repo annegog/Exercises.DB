@@ -42,6 +42,7 @@ int SHT_CreateSecondaryIndex(char *sfileName,  int buckets, char* fileName){
   memcpy(info.fileName, fileName, strlen(fileName)+1);
   info.capacityOfRecords = (BF_BLOCK_SIZE - sizeof(HT_block_info))/sizeof(Record);
   info.numBuckets=buckets;
+  info.lastBlockID = 0;
 
   CALL_BF_NUM(BF_AllocateBlock(fd, block));  // Δημιουργία καινούριου block
   data = BF_Block_GetData(block); 
@@ -66,14 +67,22 @@ SHT_info* SHT_OpenSecondaryIndex(char *indexName){
   CALL_BF_NULL(BF_GetBlock(fd, 0, block)); // λογικα εδω παίρνει το 1ο block
   data = BF_Block_GetData(block);  
 
-  SHT_info *info=data;
-  info->hashTable=(int **)malloc(info->numBuckets*sizeof(int *));
-  for (int i=0; i<info->numBuckets; i++)
-    info->hashTable[i]=malloc(2*sizeof(int));
-    //mhpws na elegxoyme an ontws gientai to malloc
-
-  info->occupiedPosInHT=0;//info->numBuckets;
-  info->sizeOfHT=info->numBuckets;
+  // SHT_info *info=data;
+  // info->hashTable=(int **)malloc(info->numBuckets*sizeof(int *));
+  // for (int i=0; i<info->numBuckets; i++)
+  //   info->hashTable[i]=malloc(2*sizeof(int));
+  //   //mhpws na elegxoyme an ontws gientai to malloc
+  
+  SHT_info *info = malloc(sizeof(SHT_info));
+  memcpy( info, data, sizeof(SHT_info)); 
+  
+  info->fileDesc = fd;
+  info->hashTable = (int *)malloc(info->numBuckets*sizeof(int));
+  for(int i=-0; i<info->numBuckets; i++)
+    info->hashTable[i] = -1;//initialize to -1
+  
+  // info->occupiedPosInHT=0;//info->numBuckets;
+  // info->sizeOfHT=info->numBuckets;
   //γιατι ακομα δεν εχει ανατεθει καποιο μπλοκ σε καποιο bucket
   //?? ΕΠΙΣΗΣ ΜΗΠΩΣ ΝΑ ΒΑΛΟΥΜΕ ΣΕ ΟΛΕΣ ΤΙΣ ΘΕΣΕΙΣ ΤΟ -1, γιατι δεν ξερω αν αρχικοποιει τον πινακα σε 0
 
@@ -81,21 +90,30 @@ SHT_info* SHT_OpenSecondaryIndex(char *indexName){
   CALL_BF_NULL(BF_UnpinBlock(block));
   BF_Block_Destroy(&block);
 
-  if(strcmp(info->fileType, "hash") ==0 )
+  if(strcmp(info->fileType, "hash") == 0 )
     return info;
   return NULL;
 }
 
 
-int SHT_CloseSecondaryIndex( SHT_info* SHT_info ){
-  int fd=SHT_info->fileDesc;
-  
-  //free the malloc   
-  for (int i=0; i<SHT_info->sizeOfHT; i++)
-  {
-    free(SHT_info->hashTable[i]);
-  }
-  free(SHT_info->hashTable);
+int SHT_CloseSecondaryIndex( SHT_info* sht_info ){
+  BF_Block *block;
+  BF_Block_Init(&block);
+  void* data;
+  int fd = sht_info->fileDesc; //find the file descriptor of the file
+
+  BF_GetBlock(fd, 0, block);
+  data = BF_Block_GetData(block); 
+
+  int bytes_of_hash = sht_info->numBuckets*sizeof(int);
+  //printf("sizeof(hash) %ld\n",bytes_of_hash);
+  memcpy(data, sht_info, sizeof(HT_info)+bytes_of_hash); //and copy the struct at the data of the block
+
+  BF_Block_SetDirty(block);
+  CALL_BF_NUM(BF_UnpinBlock(block));
+  BF_Block_Destroy(&block);
+
+  free(sht_info);
 
   CALL_BF_NUM(BF_CloseFile(fd));
   return 0;
