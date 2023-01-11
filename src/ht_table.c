@@ -111,7 +111,7 @@ int HT_CloseFile( HT_info* ht_info ){
   BF_Block_SetDirty(block);
   CALL_BF_NUM(BF_UnpinBlock(block));
   BF_Block_Destroy(&block);
-
+  //free(ht_info->hashTable); //na to trejw na dv ean doyleyei ayto!!
   free(ht_info);
 
   CALL_BF_NUM(BF_CloseFile(fd)); //and close the file

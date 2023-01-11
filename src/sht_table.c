@@ -15,7 +15,6 @@
       return -1;              \
     }                         \
   }
-  //exit(code);  ebgala ayto kai ebla to return
 
 #define CALL_BF_NULL(call)  \
 {                           \
@@ -40,7 +39,7 @@ int SHT_CreateSecondaryIndex(char *sfileName,  int buckets, char* fileName){
 
   memcpy(info.fileType, "hash", strlen("hash")+1);
   memcpy(info.fileName, fileName, strlen(fileName)+1);
-  info.capacityOfRecords = (BF_BLOCK_SIZE - sizeof(HT_block_info))/sizeof(Record);
+  info.capacityOfRecords = (BF_BLOCK_SIZE - sizeof(SHT_block_info))/sizeof(Record);
   info.numBuckets=buckets;
   info.lastBlockID = 0;
 
@@ -64,7 +63,7 @@ SHT_info* SHT_OpenSecondaryIndex(char *indexName){
   void* data;
   
   CALL_BF_NULL(BF_OpenFile(indexName, &fd));
-  CALL_BF_NULL(BF_GetBlock(fd, 0, block)); // λογικα εδω παίρνει το 1ο block
+  CALL_BF_NULL(BF_GetBlock(fd, 0, block)); 
   data = BF_Block_GetData(block);  
 
   // SHT_info *info=data;
@@ -80,11 +79,14 @@ SHT_info* SHT_OpenSecondaryIndex(char *indexName){
   info->hashTable = (int *)malloc(info->numBuckets*sizeof(int));
   for(int i=-0; i<info->numBuckets; i++)
     info->hashTable[i] = -1;//initialize to -1
+  if (info->hashTable == NULL)
+  {
+    printf("Couldn't allocate the memory for hash table!\n");
+    return NULL;
+  }
   
-  // info->occupiedPosInHT=0;//info->numBuckets;
-  // info->sizeOfHT=info->numBuckets;
-  //γιατι ακομα δεν εχει ανατεθει καποιο μπλοκ σε καποιο bucket
-  //?? ΕΠΙΣΗΣ ΜΗΠΩΣ ΝΑ ΒΑΛΟΥΜΕ ΣΕ ΟΛΕΣ ΤΙΣ ΘΕΣΕΙΣ ΤΟ -1, γιατι δεν ξερω αν αρχικοποιει τον πινακα σε 0
+  for(int i=-0; i<info->numBuckets; i++)
+    info->hashTable[i]=-1;//initialize to -1
 
   BF_Block_SetDirty(block);// prosuesa kai ayto logika xreiazetai
   CALL_BF_NULL(BF_UnpinBlock(block));
@@ -112,7 +114,7 @@ int SHT_CloseSecondaryIndex( SHT_info* sht_info ){
   BF_Block_SetDirty(block);
   CALL_BF_NUM(BF_UnpinBlock(block));
   BF_Block_Destroy(&block);
-
+  //free(ht_info->hashTable); //na to trejw na dv ean doyleyei ayto!!
   free(sht_info);
 
   CALL_BF_NUM(BF_CloseFile(fd));
@@ -120,10 +122,21 @@ int SHT_CloseSecondaryIndex( SHT_info* sht_info ){
 }
 
 int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
+  //πρπει να κραταμε ζευγος [ονομα εγγραφης , μπλοκ που βρισκεται στο πρωτευον]
+
+  //αρα 1ο βημα hash το ονομα για να δουμε σε ποιο μπλοκ του δευτερουοντος παει
+  //2ο- βαζουμε την εγγραφη [name ,blockid] στο δευτερευον
+  //αν δεν χωραει φτιαχουμε υπερχειλιση και ενημερωνουμε το nextblockid
+  //αυτα
 
 }
 
 int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name){
+  //-για το 2ερευον
+  ///εδω απλα παλι κανουμε hash το ονομα για να βρουμε το bucket
+  // απο το bucket βρισκουμε την εγγραφη-ονομα και παιρνουμε το blockid
+  //-παμε μετα στο 1ευον
+  //και παιρνουμε ολη την εγγραφη
 
 }
 

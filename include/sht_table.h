@@ -7,12 +7,12 @@
 
 
 typedef struct {
-    char fileType[5];
+    char fileType[5]; //kai edv na mh bazoyme sketo hash alla secHash?? h sHash?
     char fileName[10];
     int fileDesc;
     long int numBuckets;
     int capacityOfRecords;
-    int *hashTable; //πινακας κατακερματισμου
+    int *hashTable; //secHashTable h secondaryHashTable h sHashTable?? na to poyme etsi gia na jexwrizei??
     int lastBlockID; //
 } SHT_info;
 
