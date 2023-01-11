@@ -232,16 +232,10 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
 
   HT_block_info *block_info;
   int block_counter=0;
-  
-  // search the hash (from bottom to top) table and find the last block the bucket has
-  // for (int i=ht_info->occupiedPosInHT-1; i>=0; i--){
-  //   if(ht_info->hashTable[i][0]==bucket){
-  //     block_num=ht_info->hashTable[i][1];
-  //     break;
-  //   }
-  // }
-  // do{
-  //   CALL_BF_NUM(BF_GetBlock(fd,block_num,block));
+
+  // nomizw oti to lastBLockID den einai swstoooooo !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // for (int i = ht_info->hashTable[bucket]; i < ht_info->lastBlockID; i++){
+  //   CALL_BF_NUM(BF_GetBlock(fd,i,block));
   //   data = BF_Block_GetData(block);
 
   //   Record* rec = data;    
@@ -255,16 +249,12 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   //   }
   //   block_counter++; //count the blocks we have read
   //   CALL_BF_NUM(BF_UnpinBlock(block));
+  // }
 
-  // } while(( block_num = block_info->previousBlockId ) != -1);
-  // //get the previous block of the bucket and check again
-  
-
-  //
-  //
-  // nomizw oti to lastBLockID den einai swstoooooo !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  for (int i = ht_info->hashTable[bucket]; i < ht_info->lastBlockID; i++){
-    CALL_BF_NUM(BF_GetBlock(fd,i,block));
+  int current_block = ht_info->hashTable[bucket];
+  while(current_block != -1){
+    printf("current_block = %d\n", current_block);
+    CALL_BF_NUM(BF_GetBlock(fd,current_block,block));
     data = BF_Block_GetData(block);
 
     Record* rec = data;    
@@ -272,38 +262,26 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
 
     //check every record in the block 
     for (int record=0; record < block_info->numOfRecords; record++){
+      printRecord(rec[record]);
       if(rec[record].id == value){ //if you find the record with the specific value
+        printf("\nit's here!");
         printRecord(rec[record]); //print the record
+        printf("Blocks until i found youuu: %d\n\n",block_counter+1);
       }
     }
     block_counter++; //count the blocks we have read
+    current_block = block_info->nextBlockId; 
     CALL_BF_NUM(BF_UnpinBlock(block));
   }
 
-  // do{
-  //   CALL_BF_NUM(BF_GetBlock(fd,block_num,block));
-  //   data = BF_Block_GetData(block);
-
-  //   Record* rec = data;    
-  //   block_info = data+(512-sizeof(HT_block_info));
-
-  //   //check every record in the block 
-  //   for (int record=0; record < block_info->numOfRecords; record++){
-  //     if(rec[record].id == value){ //if you find the record with the specific value
-  //       printRecord(rec[record]); //print the record
-  //     }
-  //   }
-  //   block_counter++; //count the blocks we have read
-  //   CALL_BF_NUM(BF_UnpinBlock(block));
-  // } while ((block_num = block_info->nextBlockId) != -1);
-
- 
   BF_Block_Destroy(&block);
-  return block_counter; //return the block you read
+  return block_counter;
+  //return -1;  // no record here! return -1
+
 }
 
-
-int HashStatistics(char* filename /*όνομα του αρχείου που ενδιαφέρει */ ){
+/*
+int HashStatistics(char* filename /*όνομα του αρχείου που ενδιαφέρει  ){
   BF_Block *block;
   BF_Block_Init(&block);
 
@@ -392,3 +370,4 @@ int HashStatistics(char* filename /*όνομα του αρχείου που εν
   CALL_BF_NUM(BF_CloseFile(fd));
   return 0;
 }
+*/
