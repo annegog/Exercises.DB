@@ -5,7 +5,7 @@
 #include "bf.h"
 #include "ht_table.h"
 
-#define RECORDS_NUM 200 //is the maximum records we can have without crashing our program
+#define RECORDS_NUM 236 //is the maximum records we can have without crashing our program
 #define FILE_NAME "data.db"
 
 #define CALL_OR_DIE(call)     \
@@ -36,6 +36,6 @@ int main() {
   HT_GetAllEntries(info, id);
   
   HT_CloseFile(info);
-  // HashStatistics(FILE_NAME);
+  HashStatistics(FILE_NAME);
   BF_Close();
 }
