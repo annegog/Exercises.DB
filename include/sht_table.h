@@ -12,7 +12,7 @@ typedef struct {
     int fileDesc;
     long int numBuckets;
     int capacityOfRecords;
-    int *hashTable; //secHashTable h secondaryHashTable h sHashTable?? na to poyme etsi gia na jexwrizei??
+    int *shashTable; //secHashTable h secondaryHashTable h sHashTable?? na to poyme etsi gia na jexwrizei??
     int lastBlockID; //
 } SHT_info;
 
@@ -21,6 +21,12 @@ typedef struct {
     int nextBlockId;
     int previousBlockId;
 } SHT_block_info;
+
+typedef struct {
+    int blockID;
+    char name[15];
+} SHT_record;
+
 
 /*Η συνάρτηση SHT_CreateSecondaryIndex χρησιμοποιείται για τη δημιουργία
 και κατάλληλη αρχικοποίηση ενός αρχείου δευτερεύοντος κατακερματισμού με
