@@ -243,7 +243,7 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
   void* data;
   void* HashData;
   SHT_block_info* block_info;
-  HT_block_info* ht_block_info;
+  HT_block_info* hash_block_info;
 
 
   int fd=sht_info->fileDesc;
@@ -276,9 +276,8 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
         HashData = BF_Block_GetData(HashBlock);
 
         Record *HashRecord = HashData;
-        ht_block_info = HashData+(512-sizeof(HT_block_info)); 
-
-        for (int record=0; record < block_info->numOfRecords; record++){
+        hash_block_info = HashData+(512-sizeof(HT_block_info)); 
+        for (int record=0; record < hash_block_info->numOfRecords; record++){
           if(strcmp(HashRecord[record].name, name) == 0){ //if you find the record with the specific value
             printf("\nit's here!");
             printRecord(HashRecord[record]); //print the record
