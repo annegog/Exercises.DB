@@ -39,7 +39,7 @@ int SHT_CreateSecondaryIndex(char *sfileName,  int buckets, char* fileName){
 
   memcpy(info.fileType, "hash", strlen("hash")+1);
   memcpy(info.fileName, fileName, strlen(fileName)+1);
-  info.capacityOfRecords = (BF_BLOCK_SIZE - sizeof(SHT_block_info))/sizeof(Record);
+  info.capacityOfRecords = (BF_BLOCK_SIZE - sizeof(SHT_block_info))/sizeof(SHT_record);
   info.numBuckets=buckets;
   info.lastBlockID = 0;
 
@@ -144,14 +144,13 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
   SHT_record current_record;
   current_record.blockID = block_id;
   memcpy(current_record.name, record.name, sizeof(record.name));
-  printf("eeeeeeeeeee\n");
+
   //2ο- βαζουμε την εγγραφη [name ,blockid] στο δευτερευον
   //αν δεν χωραει φτιαχουμε υπερχειλιση και ενημερωνουμε το nextblockid
   //αυτα
 
   if(blockId==-1) //the bucket has no block
   {
-    printf("blockid %d\n", blockId);
     //allocate one
     //and place the record there
     CALL_BF_NUM(BF_AllocateBlock(fd, block));
@@ -174,16 +173,13 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
     return 0;
   }
   //else
-  printf("1-blockid %d\n", blockId);
   CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
   data = BF_Block_GetData(block);
 
   memcpy(&block_info, data+512-sizeof(SHT_block_info), sizeof(SHT_block_info));
-  printf("block_info.nextBlockId %d\n ",block_info.nextBlockId );
-  while(block_info.nextBlockId != -1) //!!-- Μπορουμε να το κανουμε να μοιαζει με το πιο κατω while
+  while(block_info.nextBlockId != -1)
   {
     blockId=block_info.nextBlockId;
-    printf("--blockid %d\n", blockId);
     CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
     data = BF_Block_GetData(block); 
 
@@ -220,7 +216,6 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
     new_block_info.previousBlockId = blockId; 
     new_block_info.nextBlockId = -1;
     block_info.nextBlockId = ++(sht_info->lastBlockID);
-    printf("WHEN THERE IS NO SPACE -- block_info.nextBlockId %d\n",block_info.nextBlockId);
     memcpy(new_data+(512-sizeof(SHT_block_info)), &new_block_info, sizeof(SHT_block_info));
 
     BF_Block_SetDirty(new_block);
@@ -240,6 +235,68 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
 int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name){
   //-για το 2ερευον
   ///εδω απλα παλι κανουμε hash το ονομα για να βρουμε το bucket
+  BF_Block *block;
+  BF_Block_Init(&block);
+  BF_Block *HashBlock;
+  BF_Block_Init(&HashBlock);
+
+  void* data;
+  void* HashData;
+  SHT_block_info* block_info;
+  HT_block_info* ht_block_info;
+
+
+  int fd=sht_info->fileDesc;
+  long int numBuckets = sht_info->numBuckets;
+  
+  char first_letter = name[0];
+  int first_num = (int)first_letter;
+
+  int bucket = first_num%numBuckets;
+
+  int current_block = sht_info->shashTable[bucket];
+
+  int block_counter = 0;
+  int HashBlockID = 0;
+
+  while(current_block != -1){
+    printf("current_block = %d\n", current_block);
+    CALL_BF_NUM(BF_GetBlock(fd,current_block,block));
+    data = BF_Block_GetData(block);
+
+    SHT_record* rec = data;    
+    block_info = data+(512-sizeof(SHT_block_info)); //no memcopy??
+
+    //check every record in the block 
+    for (int record=0; record < block_info->numOfRecords; record++){
+      if(strcmp(rec[record].name, name) == 0){ //if you find the record with the specific value
+        printf("\nfound it !");
+        HashBlockID = rec[record].blockID;
+        CALL_BF_NUM(BF_GetBlock(ht_info->fileDesc, HashBlockID, HashBlock));
+        HashData = BF_Block_GetData(HashBlock);
+
+        Record *HashRecord = HashData;
+        ht_block_info = HashData+(512-sizeof(HT_block_info)); 
+
+        for (int record=0; record < block_info->numOfRecords; record++){
+          if(strcmp(HashRecord[record].name, name) == 0){ //if you find the record with the specific value
+            printf("\nit's here!");
+            printRecord(HashRecord[record]); //print the record
+            printf("Blocks until i found youuu: %d\n\n",block_counter+1);
+          }
+        }
+      }
+    }
+    block_counter++; //count the blocks we have read
+    current_block = block_info->nextBlockId; 
+    CALL_BF_NUM(BF_UnpinBlock(block));
+    CALL_BF_NUM(BF_UnpinBlock(HashBlock));
+  }
+  
+  BF_Block_Destroy(&HashBlock);
+  BF_Block_Destroy(&block);
+  return block_counter;
+
   // απο το bucket βρισκουμε την εγγραφη-ονομα και παιρνουμε το blockid
   //-παμε μετα στο 1ευον
   //και παιρνουμε ολη την εγγραφη
