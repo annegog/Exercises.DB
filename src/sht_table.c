@@ -136,8 +136,10 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
 
   char first_letter = record.name[0];
   int first_num = (int)first_letter;
+  //printf("first num %d\n",first_num);
 
   int bucket = first_num%numBuckets;
+  //printf("bucket-- %d\n", bucket);
 
   int blockId = sht_info->shashTable[bucket];
 
@@ -168,22 +170,24 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
     CALL_BF_NUM(BF_UnpinBlock(block));
 
     sht_info->shashTable[bucket]= ++(sht_info->lastBlockID);
+    printf("sht_info->lastBlockID %d\n",sht_info->lastBlockID);
     // printf("ht_info->hashTable[bucket] %d\n", ht_info->hashTable[bucket]);
     BF_Block_Destroy(&block);
 
     return 0;
   }
   //else
+  int another_block;
   CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
   data = BF_Block_GetData(block);
 
   memcpy(&block_info, data+512-sizeof(SHT_block_info), sizeof(SHT_block_info));
   while(block_info.nextBlockId != -1)
   {
-    blockId=block_info.nextBlockId; 
+    another_block=block_info.nextBlockId; 
     CALL_BF_NULL(BF_UnpinBlock(block));
     printf("\nnext block  ID: %d\n", block_info.nextBlockId);
-    CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
+    CALL_BF_NUM(BF_GetBlock(fd, another_block, block));
     data = BF_Block_GetData(block); 
 
     memcpy(&block_info, data+512-sizeof(SHT_block_info), sizeof(SHT_block_info));
@@ -215,16 +219,18 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
 
     SHT_record* rec = new_data;
     rec[0] = current_record;
-
+    printf("No SPACE \n");
     new_block_info.numOfRecords = 1;
-    new_block_info.previousBlockId = blockId; 
+    new_block_info.previousBlockId = another_block;//blockId; 
+    printf("blockid %d\n",blockId);
     new_block_info.nextBlockId = -1;
-    block_info.nextBlockId = ++(sht_info->lastBlockID);
     memcpy(new_data+(512-sizeof(SHT_block_info)), &new_block_info, sizeof(SHT_block_info));
 
     BF_Block_SetDirty(new_block);
     CALL_BF_NUM(BF_UnpinBlock(new_block));
-
+    printf("sht_info->lastBlockID %d\n",sht_info->lastBlockID);
+    block_info.nextBlockId = ++(sht_info->lastBlockID);
+    printf("sht_info->lastBlockID %d\n",sht_info->lastBlockID);
     memcpy(data+512-sizeof(SHT_block_info), &block_info, sizeof(SHT_block_info));
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
