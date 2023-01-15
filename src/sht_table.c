@@ -37,7 +37,7 @@ int SHT_CreateSecondaryIndex(char *sfileName,  int buckets, char* fileName){
   CALL_BF_NUM(BF_CreateFile(sfileName));
   CALL_BF_NUM(BF_OpenFile(sfileName, &fd));
 
-  memcpy(info.fileType, "hash", strlen("hash")+1);
+  memcpy(info.fileType, "shash", strlen("shash")+1);
   memcpy(info.fileName, fileName, strlen(fileName)+1);
   info.capacityOfRecords = (BF_BLOCK_SIZE - sizeof(SHT_block_info))/sizeof(SHT_record);
   info.numBuckets=buckets;
@@ -92,7 +92,7 @@ SHT_info* SHT_OpenSecondaryIndex(char *indexName){
   CALL_BF_NULL(BF_UnpinBlock(block));
   BF_Block_Destroy(&block);
 
-  if(strcmp(info->fileType, "hash") == 0 )
+  if(strcmp(info->fileType, "shash") == 0 )
     return info;
   return NULL;
 }
@@ -302,6 +302,9 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
   //και παιρνουμε ολη την εγγραφη
 
 }
+
+///////////////// ΝΑ ΒΛΑΩ ΠΡΙΝΤΣ ΓΙΑ ΤΗΝ ΛΕΙΤΟΥΡΓΙΚΟΤΗΤΑ
+///////////////// ΚΑΙ ΣΧΟΛΙΑΑΑ
 
 
 

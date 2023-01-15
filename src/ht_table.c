@@ -262,7 +262,7 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
 }
 
 
-int HashStatistics(char* filename /*όνομα του αρχείου που ενδιαφέρει  */){
+int HT_HashStatistics(char* filename /*όνομα του αρχείου που ενδιαφέρει  */){
   BF_Block *ht_info_block;
   BF_Block_Init(&ht_info_block);
 
