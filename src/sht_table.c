@@ -186,14 +186,13 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
   {
     another_block=block_info.nextBlockId; 
     CALL_BF_NULL(BF_UnpinBlock(block));
-    printf("\nnext block  ID: %d\n", block_info.nextBlockId);
+    printf("next block  ID: %d\n", block_info.nextBlockId);
     CALL_BF_NUM(BF_GetBlock(fd, another_block, block));
     data = BF_Block_GetData(block); 
 
     memcpy(&block_info, data+512-sizeof(SHT_block_info), sizeof(SHT_block_info));
 
   }
-
   //if the block has empty space then write the record at the block
   if(block_info.numOfRecords < sht_info->capacityOfRecords){
     SHT_record* rec = data;
@@ -210,7 +209,7 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
   //also update the hash table
   else{
     BF_Block *new_block;
-    HT_block_info new_block_info;
+    SHT_block_info new_block_info;
     void* new_data;
 
     BF_Block_Init(&new_block);
@@ -277,19 +276,22 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
     block_info = data+(512-sizeof(SHT_block_info)); //no memcopy??
 
     //check every record in the block 
+    printf("num of records in this block %d\n",block_info->numOfRecords);
     for (int record=0; record < block_info->numOfRecords; record++){
+      printf("i'm in the record(SHT): %d\n", record);
       if(strcmp(rec[record].name, name) == 0){ //if you find the record with the specific value
-        printf("\nfound it !");
+        printf("found it!\n");
         HashBlockID = rec[record].blockID;
         CALL_BF_NUM(BF_GetBlock(ht_info->fileDesc, HashBlockID, HashBlock));
         HashData = BF_Block_GetData(HashBlock);
         
         Record *HashRecord = HashData;
         hash_block_info = HashData+(512-sizeof(HT_block_info)); 
-        for (int record=0; record < hash_block_info->numOfRecords; record++){
-          if(strcmp(HashRecord[record].name, name) == 0){ //if you find the record with the specific value
-            printf("\nit's here!");
-            printRecord(HashRecord[record]); //print the record
+        for (int record_=0; record_ < hash_block_info->numOfRecords; record_++){
+          printf("i'm in the record_(HT): %d\n", record_);
+          if(strcmp(HashRecord[record_].name, name) == 0){ //if you find the record with the specific value
+            printf("it's here! - ");
+            printRecord(HashRecord[record_]); //print the record
             printf("Blocks until i found youuu: %d\n\n",block_counter+1);
           }
         }
@@ -368,7 +370,7 @@ int SHT_HashStatistics(char* filename /*όνομα του αρχείου που 
       data = BF_Block_GetData(block);
       //η παρακατω εντολη εχει θεμα ενα πανω στην insert δεν εχει???
       //memcpy(&block_info, data+512-sizeof(HT_block_info), sizeof(HT_block_info));
-      block_info = data+(512-sizeof(HT_block_info));
+      block_info = data+(512-sizeof(SHT_block_info));
       recordsOfBuckets[i]+=block_info->numOfRecords; //get the number of records for the specific block
       blocksOfBuckets[i]++; //increase the blocks that the bucket has by one
       current_block = block_info->nextBlockId; //go to the next block
@@ -404,6 +406,7 @@ int SHT_HashStatistics(char* filename /*όνομα του αρχείου που 
 
   int overflowedBuckets = 0;
   for(int i=0; i<buckets; i++){
+    printf("%d\n", blocksOfBuckets[i]);
     if(blocksOfBuckets[i] > 1){
       printf("The bucket %d has %d overflowed blocks\n", i, blocksOfBuckets[i]-1);
       overflowedBuckets++;
