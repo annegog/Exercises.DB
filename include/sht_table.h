@@ -7,7 +7,7 @@
 
 
 typedef struct {
-    char fileType[5]; //kai edv na mh bazoyme sketo hash alla secHash?? h sHash?
+    char fileType[6]; //kai edv na mh bazoyme sketo hash alla secHash?? h sHash?
     char fileName[10];
     int fileDesc;
     long int numBuckets;

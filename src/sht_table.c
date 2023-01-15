@@ -153,6 +153,7 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
   {
     //allocate one
     //and place the record there
+    printf("block id: %d\n", blockId);
     CALL_BF_NUM(BF_AllocateBlock(fd, block));
     data = BF_Block_GetData(block);
 
@@ -179,11 +180,14 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
   memcpy(&block_info, data+512-sizeof(SHT_block_info), sizeof(SHT_block_info));
   while(block_info.nextBlockId != -1)
   {
-    blockId=block_info.nextBlockId;
+    blockId=block_info.nextBlockId; 
+    CALL_BF_NULL(BF_UnpinBlock(block));
+    printf("\nnext block  ID: %d\n", block_info.nextBlockId);
     CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
     data = BF_Block_GetData(block); 
 
     memcpy(&block_info, data+512-sizeof(SHT_block_info), sizeof(SHT_block_info));
+
   }
 
   //if the block has empty space then write the record at the block
@@ -244,7 +248,6 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
   void* HashData;
   SHT_block_info* block_info;
   HT_block_info* hash_block_info;
-
 
   int fd=sht_info->fileDesc;
   long int numBuckets = sht_info->numBuckets;
@@ -319,9 +322,11 @@ int SHT_HashStatistics(char* filename /*όνομα του αρχείου που 
   void* sht_info_data;
   
   CALL_BF_NUM(BF_OpenFile(filename, &fd)); //open file
+  printf("1\n");
   CALL_BF_NUM(BF_GetBlock(fd, 0, sht_info_block)); 
   sht_info_data = BF_Block_GetData(sht_info_block); //get the data of the fisrt block
-  
+  printf("2\n");
+
   // HT_info *ht_info = malloc(sizeof(HT_info));
   // memcpy( ht_info, ht_info_data, sizeof(HT_info)); 
   SHT_info *sht_info = sht_info_data;
@@ -338,7 +343,7 @@ int SHT_HashStatistics(char* filename /*όνομα του αρχείου που 
   BF_Block *block;
   BF_Block_Init(&block);
 
-  HT_block_info *block_info;
+  SHT_block_info *block_info;
   void* data;
   
   int recordsOfBuckets[buckets];
