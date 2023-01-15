@@ -168,7 +168,7 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
     memcpy(data+512-sizeof(SHT_block_info), &block_info, sizeof(SHT_block_info));
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
-
+ 
     sht_info->shashTable[bucket]= ++(sht_info->lastBlockID);
     printf("sht_info->lastBlockID %d\n",sht_info->lastBlockID);
     // printf("ht_info->hashTable[bucket] %d\n", ht_info->hashTable[bucket]);
