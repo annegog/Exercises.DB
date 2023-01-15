@@ -67,7 +67,9 @@ HP_info* HP_OpenFile(char *fileName){
   CALL_BF_NULL(BF_GetBlock(fd, 0, block)); 
   data = BF_Block_GetData(block); //get the data of the fisrt block
 
-  HP_info *info=data;
+  //HP_info *info=data;
+  HP_info *info=malloc(sizeof(HP_info));
+  memcpy(info, data, sizeof(HP_info));
   info->fileDesc = fd; //write at the struct the file descriptor that is being used
 
   //set dirty the block and unpin it from the memory
@@ -83,6 +85,7 @@ HP_info* HP_OpenFile(char *fileName){
 
 int HP_CloseFile( HP_info* hp_info ){
   int fd=hp_info->fileDesc; //find the file descriptor of the file
+  free(hp_info);
   CALL_BF_NUM(BF_CloseFile(fd)); //and close it
 }
 

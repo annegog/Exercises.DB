@@ -314,6 +314,7 @@ int HashStatistics(char* filename /*όνομα του αρχείου που εν
       recordsOfBuckets[i]+=block_info->numOfRecords; //get the number of records for the specific block
       blocksOfBuckets[i]++; //increase the blocks that the bucket has by one
       current_block = block_info->nextBlockId; //go to the next block
+      BF_UnpinBlock(block);
     }
   }
 

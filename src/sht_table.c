@@ -274,7 +274,7 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
         HashBlockID = rec[record].blockID;
         CALL_BF_NUM(BF_GetBlock(ht_info->fileDesc, HashBlockID, HashBlock));
         HashData = BF_Block_GetData(HashBlock);
-
+        
         Record *HashRecord = HashData;
         hash_block_info = HashData+(512-sizeof(HT_block_info)); 
         for (int record=0; record < hash_block_info->numOfRecords; record++){
@@ -284,6 +284,7 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
             printf("Blocks until i found youuu: %d\n\n",block_counter+1);
           }
         }
+        block_counter++;
       }
     }
     block_counter++; //count the blocks we have read
