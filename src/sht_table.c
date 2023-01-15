@@ -293,6 +293,8 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
     CALL_BF_NUM(BF_UnpinBlock(HashBlock));
   }
   
+  printf("aaaaaaaaaaa  last %d --- %d\n\n", sht_info->lastBlockID, block_counter);
+
   BF_Block_Destroy(&HashBlock);
   BF_Block_Destroy(&block);
   return block_counter;
@@ -300,7 +302,6 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
   // απο το bucket βρισκουμε την εγγραφη-ονομα και παιρνουμε το blockid
   //-παμε μετα στο 1ευον
   //και παιρνουμε ολη την εγγραφη
-
 }
 
 ///////////////// ΝΑ ΒΛΑΩ ΠΡΙΝΤΣ ΓΙΑ ΤΗΝ ΛΕΙΤΟΥΡΓΙΚΟΤΗΤΑ
@@ -308,3 +309,104 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
 
 
 
+int SHT_HashStatistics(char* filename /*όνομα του αρχείου που ενδιαφέρει  */){
+  BF_Block *sht_info_block;
+  BF_Block_Init(&sht_info_block);
+
+  //HT_info* ht_info = HT_OpenFile(filename);
+
+  int fd;
+  void* sht_info_data;
+  
+  CALL_BF_NUM(BF_OpenFile(filename, &fd)); //open file
+  CALL_BF_NUM(BF_GetBlock(fd, 0, sht_info_block)); 
+  sht_info_data = BF_Block_GetData(sht_info_block); //get the data of the fisrt block
+  
+  // HT_info *ht_info = malloc(sizeof(HT_info));
+  // memcpy( ht_info, ht_info_data, sizeof(HT_info)); 
+  SHT_info *sht_info = sht_info_data;
+  //εδω σκεφτηκα οτι μπορουμε κατευθειαν να δειξουμε στα data αφου δεν θα τα πειραξουμε και δεν
+  //θα κλεισουμε το block -οποτε δεν χρειαζομαστε το μαλλοκ
+
+  printf(">> file type %s\n", sht_info->fileType);
+  if(strcmp(sht_info->fileType, "shash") != 0 ) //if the file is not hash type 
+    return -1;
+
+  int buckets = sht_info->numBuckets;
+  int current_block;
+
+  BF_Block *block;
+  BF_Block_Init(&block);
+
+  HT_block_info *block_info;
+  void* data;
+  
+  int recordsOfBuckets[buckets];
+  int blocksOfBuckets[buckets];
+  for (int i=0; i<buckets; i++){
+    recordsOfBuckets[i] = 0;
+    blocksOfBuckets[i] = 0;
+  }
+
+  for(int i=0; i<buckets; i++){ //for every bucket
+    printf("hash table-- %d\n",sht_info->shashTable[i]);
+    current_block = sht_info->shashTable[i];
+
+    while(current_block != -1){ //find every block that each bucket has
+      CALL_BF_NUM(BF_GetBlock(fd,current_block,block));
+      data = BF_Block_GetData(block);
+      //η παρακατω εντολη εχει θεμα ενα πανω στην insert δεν εχει???
+      //memcpy(&block_info, data+512-sizeof(HT_block_info), sizeof(HT_block_info));
+      block_info = data+(512-sizeof(HT_block_info));
+      recordsOfBuckets[i]+=block_info->numOfRecords; //get the number of records for the specific block
+      blocksOfBuckets[i]++; //increase the blocks that the bucket has by one
+      current_block = block_info->nextBlockId; //go to the next block
+      BF_UnpinBlock(block);
+    }
+  }
+
+  int min_records = 1000;
+  int min_bucket;
+  int max_records = 0;
+  int max_bucket;
+  int total_records = 0;
+  int total_blocks = 0;
+
+  for (int i=0; i<buckets; i++){
+    if(recordsOfBuckets[i] < min_records)
+    {
+      min_records = recordsOfBuckets[i];
+      min_bucket=i;
+    }
+    if(recordsOfBuckets[i] > max_records)
+    {  
+      max_records = recordsOfBuckets[i];
+      max_bucket=i;
+    }
+    total_records += recordsOfBuckets[i];
+    total_blocks += blocksOfBuckets[i];
+  }
+  printf("Minimum records are: %d in bucket %d\n", min_records, min_bucket);
+  printf("Maximum records are: %d in bucket %d\n", max_records, max_bucket);
+  printf("Mean records are: %ld\n", total_records/buckets);
+  printf("Mean blocks are: %ld\n", total_blocks/buckets);
+
+  int overflowedBuckets = 0;
+  for(int i=0; i<buckets; i++){
+    if(blocksOfBuckets[i] > 1){
+      printf("The bucket %d has %d overflowed blocks\n", i, blocksOfBuckets[i]-1);
+      overflowedBuckets++;
+    }
+  }
+  printf("There are %d buckets with overflowed blocks\n", overflowedBuckets);
+  
+  printf("The file: %s has in total %d blocks\n", filename, sht_info->lastBlockID+1); //+1 for block with id 0
+
+  CALL_BF_NUM(BF_UnpinBlock(block));
+  CALL_BF_NUM(BF_UnpinBlock(sht_info_block));
+  BF_Block_Destroy(&block);
+  BF_Block_Destroy(&sht_info_block);
+
+  CALL_BF_NUM(BF_CloseFile(fd));
+  return 0;
+}

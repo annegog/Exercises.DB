@@ -79,5 +79,7 @@ int SHT_SecondaryGetAllEntries(
     SHT_info* header_info, /* επικεφαλίδα του αρχείου δευτερεύοντος ευρετηρίου*/
     char* name /* το όνομα στο οποίο γίνεται αναζήτηση */);
 
+int SHT_HashStatistics(
+    char* filename /* όνομα του αρχείου που ενδιαφέρει */ );
 
 #endif // SHT_FILE_H
