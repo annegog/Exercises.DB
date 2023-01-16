@@ -180,7 +180,7 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
     return 0;
   }
   //else
-  //int another_block;
+  //int another_block=blockId;
   CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
   data = BF_Block_GetData(block);
   SHT_record *sht_rec=data;
@@ -197,7 +197,7 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
 
     blockId=block_info.nextBlockId; 
     CALL_BF_NULL(BF_UnpinBlock(block));
-    //printf("\n next block  ID: %d \n", block_info.nextBlockId);
+    printf("\nnext block  ID: %d\n", block_info.nextBlockId);
     CALL_BF_NUM(BF_GetBlock(fd, blockId, block));
     data = BF_Block_GetData(block); 
     sht_rec=data;
@@ -229,7 +229,7 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
   //also update the hash table
   else{
     BF_Block *new_block;
-    HT_block_info new_block_info;
+    SHT_block_info new_block_info;
     void* new_data;
 
     BF_Block_Init(&new_block);
@@ -252,7 +252,7 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
     // printf("block_info.nextBlockId %d\n",block_info.nextBlockId);
     // printf("sht_info->lastBlockID %d\n",sht_info->lastBlockID);
     //
-    memcpy(data+512-sizeof(SHT_block_info), &block_info, sizeof(SHT_block_info));
+    memcpy(data+(512-sizeof(SHT_block_info)), &block_info, sizeof(SHT_block_info));
     BF_Block_SetDirty(block);
     CALL_BF_NUM(BF_UnpinBlock(block));
 
@@ -306,11 +306,8 @@ int SHT_SecondaryGetAllEntries(HT_info* ht_info, SHT_info* sht_info, char* name)
     //check every record in the block 
     printf("num of records in this block %d\n",block_info->numOfRecords);
     for (int record=0; record < block_info->numOfRecords; record++){
-      //("first for\n");
-      //printf("record.name %s record.blockid %d\n",rec[record].name, rec[record].blockID);
       if(strcmp(rec[record].name, name) == 0){ //if you find the record with the specific value
-        //printf("\nfound it !");
-        //printf("first if\n");
+        printf("\nfound it !");
         HashBlockID = rec[record].blockID;
         CALL_BF_NUM(BF_GetBlock(ht_info->fileDesc, HashBlockID, HashBlock));
         HashData = BF_Block_GetData(HashBlock);
@@ -401,9 +398,8 @@ int SHT_HashStatistics(char* filename /*όνομα του αρχείου που 
       CALL_BF_NUM(BF_GetBlock(fd,current_block,block));
       data = BF_Block_GetData(block);
       //η παρακατω εντολη εχει θεμα ενα πανω στην insert δεν εχει???
-      //memcpy(block_info, data+512-sizeof(SHT_block_info), sizeof(SHT_block_info));
-      
-      block_info = data+(512-sizeof(SHT_block_info));
+      //memcpy(&block_info, data+512-sizeof(HT_block_info), sizeof(HT_block_info));
+      block_info = data+(512-sizeof(HT_block_info));
       recordsOfBuckets[i]+=block_info->numOfRecords; //get the number of records for the specific block
       blocksOfBuckets[i]++; //increase the blocks that the bucket has by one
       current_block = block_info->nextBlockId; //go to the next block
