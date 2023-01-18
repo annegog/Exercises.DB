@@ -50,18 +50,20 @@ make sht
 
 -> SHT
  - sht_table.h:
-    * struct SHT_block_info:
+    * struct SHT_record: it contains the name (of the ht record) and the block id of the block.
  - sht_table.c:
-    * SHT_CreateSecondaryIndex:
-    * SHT_OpenSecondaryIndex: 
-    * SHT_CloseSecondaryIndex: 
+    * SHT_CreateSecondaryIndex: Create a file with fileName name, create a block and initialize the metadata of the file.
+    * SHT_OpenSecondaryIndex: Make space for the secondary hash table, open the first block and check the file type.
+    * SHT_CloseSecondaryIndex: Free the memory of the secondary hash table and close the file.
     * SHT_SecondaryInsertEntry: 
-    * SHT_SecondaryGetAllEntries: 
- - sht_main.c: 
+    * SHT_SecondaryGetAllEntries: For every block and for every record in that block, if you find a record name you are looking for go to the hash table block. 
+                                 And for every record in that block id, if you find the name print the record. Return the number of blocks (ht blocks + sht blocks).
+
 
 
 ----------------------------------------------------------------
 **Further observations**
+- SHT_HashStatistics: something is wrong !!!!!!!!!!!!!!
 - HT: 
    - 10 buckets with maximum 619 RECORDS_NUM (BF Error: BF memory is full)
    - 30 buckets with maximum 759 RECORDS_NUM
