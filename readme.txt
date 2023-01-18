@@ -75,6 +75,6 @@ make sht
 ----------------------------------------------------------------
 **Problems**
 -> SHT: After the SHT_CloseSecondaryIndex there is something wrong with the way of saving the information of the SHT_block_info. Specifically, we noticed that even though we write the correct number at the variable
-      in SHT_HashStatistics, the numbers are wrong. As a result, the function SHT_HashStatistics isn't working! AND we don't why. :(
+      in SHT_HashStatistics, the numbers are wrong. As a result, the function SHT_HashStatistics isn't working! But it works with 1 bucket (sht). AND we don't why. :(
 -> HT - SHT: When we try to free the hash table at the function HT_CloseFile and SHT_CloseSecondaryIndex, even though we tried to save the information of the hash table, the information is erased! 
          (That's why we commented the lines 119-128 in the file ht_table.c. We tried 2 different ways of saving the hash tables data, but it didn't work)
