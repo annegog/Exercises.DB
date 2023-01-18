@@ -116,16 +116,16 @@ int HT_CloseFile( HT_info* ht_info ){
   int bytes_of_hash=ht_info->numBuckets*sizeof(int); //calculate the extra bytes of the hash table
   memcpy(data, ht_info, sizeof(HT_info)+bytes_of_hash); //and copy the struct at the data of the block
 
-  //1ος τροπος
+  //other ways we tried to save hash table (beacause of the free problem) but didn't work
+  // 1.
   // HT_info* data_info=data;
   // data_info->hashTable=ht_info->hashTable;
   // for (int i = 0; i < ht_info->numBuckets; i++)
   // {
   //   data_info->hashTable[i]=ht_info->hashTable[i];
   // }
-  //2ος τροπος
-  //memcpy(data_info->hashTable, ht_info->hashTable, bytes_of_hash);  
-  //δεν δουλευουν
+  // 2.
+  // memcpy(data_info->hashTable, ht_info->hashTable, bytes_of_hash);  
 
   //set dirty the block and unpin it from the memory
   BF_Block_SetDirty(block);
