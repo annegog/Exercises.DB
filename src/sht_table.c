@@ -372,7 +372,6 @@ int SHT_HashStatistics(char* filename /*όνομα του αρχείου που 
   }
 
   for(int i=0; i<buckets; i++){ //for every bucket
-    printf("hash table-- %d\n",sht_info->shashTable[i]);
     current_block = sht_info->shashTable[i];
 
     while(current_block != -1){ //find every block that each bucket has
@@ -383,7 +382,7 @@ int SHT_HashStatistics(char* filename /*όνομα του αρχείου που 
       recordsOfBuckets[i]+=block_info->numOfRecords; //get the number of records for the specific block
       blocksOfBuckets[i]++; //increase the blocks that the bucket has by one
       current_block = block_info->nextBlockId; //go to the next block
-      printf("current_block %d\n",current_block);
+
       BF_UnpinBlock(block);
     }
   }
