@@ -48,7 +48,7 @@ int main() {
     // Κλείνουμε το αρχείο κατακερματισμού και το δευτερεύον ευρετήριο
     SHT_CloseSecondaryIndex(index_info);
     HT_CloseFile(info);
-    //HT_HashStatistics(FILE_NAME); //??
+    //HT_HashStatistics(FILE_NAME); //we added the statistics of HT
     SHT_HashStatistics(INDEX_NAME);
     BF_Close();
 }

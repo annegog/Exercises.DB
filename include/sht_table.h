@@ -7,13 +7,13 @@
 
 
 typedef struct {
-    char fileType[6]; //kai edv na mh bazoyme sketo hash alla secHash?? h sHash?
+    char fileType[6]; 
     char fileName[10];
     int fileDesc;
     long int numBuckets;
     int capacityOfRecords;
-    int *shashTable; //secHashTable h secondaryHashTable h sHashTable?? na to poyme etsi gia na jexwrizei??
-    int lastBlockID; //
+    int *shashTable; 
+    int lastBlockID;
 } SHT_info;
 
 typedef struct {

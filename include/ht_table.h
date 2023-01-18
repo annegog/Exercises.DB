@@ -17,7 +17,7 @@ typedef struct {
     // Να το συμπληρώσετε
     int numOfRecords; //the number of records the block has
     int previousBlockId; //id of the previous block
-    int nextBlockId;
+    int nextBlockId; //id of the next block
 } HT_block_info;
 
 /*Η συνάρτηση HT_CreateFile χρησιμοποιείται για τη δημιουργία
