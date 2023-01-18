@@ -5,7 +5,7 @@
 #include "bf.h"
 #include "ht_table.h"
 
-#define RECORDS_NUM 236
+#define RECORDS_NUM 100
 #define FILE_NAME "data.db"
 
 #define CALL_OR_DIE(call)     \
@@ -31,7 +31,7 @@ int main() {
     record = randomRecord();
     HT_InsertEntry(info, record);
   }
-  printf("RUN PrintAllEntries\n");
+  printf("\nRUN PrintAllEntries\n");
   int id = rand() % RECORDS_NUM;
   HT_GetAllEntries(info, id);
   

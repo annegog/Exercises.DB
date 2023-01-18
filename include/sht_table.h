@@ -22,6 +22,7 @@ typedef struct {
     int previousBlockId;
 } SHT_block_info;
 
+//the type of record for a secondary index
 typedef struct {
     int blockID;
     char name[15];

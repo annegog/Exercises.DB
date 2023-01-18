@@ -67,9 +67,15 @@ HP_info* HP_OpenFile(char *fileName){
   CALL_BF_NULL(BF_GetBlock(fd, 0, block)); 
   data = BF_Block_GetData(block); //get the data of the fisrt block
 
-  //HP_info *info=data;
+  //allocate the memory for the struct HP_info
   HP_info *info=malloc(sizeof(HP_info));
-  memcpy(info, data, sizeof(HP_info));
+  if (info == NULL) //if the memory was not allocated successfully
+  {
+    printf("Couldn't allocate the memory for HP_info struct!\n");
+    return NULL; //return NULL
+  }
+
+  memcpy(info, data, sizeof(HP_info)); //copy the data at the struct
   info->fileDesc = fd; //write at the struct the file descriptor that is being used
 
   //set dirty the block and unpin it from the memory
@@ -79,13 +85,16 @@ HP_info* HP_OpenFile(char *fileName){
 
   if(strcmp(info->fileType, "heap") ==0 ) //if the file is heap type 
     return info; //return the struct info
+
+  printf("Wrong type of file!\n");
+  printf("The type should be heap, instead of %s!\n", info->fileType);
   return NULL ; //else return NULL
 }
 
 
 int HP_CloseFile( HP_info* hp_info ){
   int fd=hp_info->fileDesc; //find the file descriptor of the file
-  free(hp_info);
+  free(hp_info); //free the memory
   CALL_BF_NUM(BF_CloseFile(fd)); //and close it
 }
 
@@ -118,6 +127,9 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
 
     BF_Block_Destroy(&block);
 
+    printf("At the block %d, was inserted the first record: ",hp_info->lastBlockID);
+    printRecord(record);
+
     return hp_info->lastBlockID;
   }
 
@@ -135,6 +147,9 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     CALL_BF_NUM(BF_UnpinBlock(block));
 
     BF_Block_Destroy(&block); 
+
+    printf("At block %d, was inserted the record: ",hp_info->lastBlockID);
+    printRecord(record);
 
     return hp_info->lastBlockID;
   } 
@@ -168,6 +183,9 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_Block_Destroy(&block);
     BF_Block_Destroy(&new_block);
 
+    printf("There was no space at block %d, so at block %d was inserted the record: ",id_of_last_block, hp_info->lastBlockID);
+    printRecord(record);
+
     return hp_info->lastBlockID; 
   }
 }
@@ -183,6 +201,8 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
   int block_num;
   int last_record_block = 0;
   CALL_BF_NUM(BF_GetBlockCounter(fd, &block_num));
+
+  printf("Find all the records with id: %d\n", value);
   
   //for every block at the file except the fisrt one
   for(int i=1; i<block_num; i++){
@@ -196,6 +216,7 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
     for(int record=0; record<block_info->numOfRecords; record++){   
       if(rec[record].id == value){ //if you find the record with the specific value
         last_record_block = i;
+        printf("At the block %d, was found the record: ",i);
         printRecord(rec[record]); //print the record
       }
     }

@@ -6,7 +6,7 @@
 #include "bf.h"
 #include "hp_file.h"
 
-#define RECORDS_NUM 594 //is the maximum records we can have without crashing our program 
+#define RECORDS_NUM  100
 #define FILE_NAME "data.db"
 
 #define CALL_OR_DIE(call)     \
@@ -33,7 +33,7 @@ int main() {
     HP_InsertEntry(info, record);
   }
 
-  printf("RUN PrintAllEntries\n");
+  printf("\nRUN PrintAllEntries\n");
   int id = rand() % RECORDS_NUM;
   HP_GetAllEntries(info, id);
 

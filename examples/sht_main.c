@@ -24,8 +24,8 @@ int main() {
     srand(12569874);
     BF_Init(LRU);
     // Αρχικοποιήσεις
-    HT_CreateFile(FILE_NAME,1);
-    SHT_CreateSecondaryIndex(INDEX_NAME,1,FILE_NAME);
+    HT_CreateFile(FILE_NAME,10);
+    SHT_CreateSecondaryIndex(INDEX_NAME,10,FILE_NAME);
     HT_info* info = HT_OpenFile(FILE_NAME);
     SHT_info* index_info = SHT_OpenSecondaryIndex(INDEX_NAME);
 
@@ -38,19 +38,17 @@ int main() {
     printf("Insert Entries\n");
     for (int id = 0; id < RECORDS_NUM; ++id) {
         record = randomRecord();
-        // printRecord(record);
         int block_id = HT_InsertEntry(info, record);
-        // printf("hi\n");
-        printRecord(record);
         SHT_SecondaryInsertEntry(index_info, record, block_id);
     }
     // Τυπώνουμε όλες τις εγγραφές με όνομα searchName
-    printf("RUN PrintAllEntries for name %s\n",searchName);
+    printf("\nRUN PrintAllEntries for name %s\n",searchName);
     SHT_SecondaryGetAllEntries(info,index_info,searchName);
 
     // Κλείνουμε το αρχείο κατακερματισμού και το δευτερεύον ευρετήριο
     SHT_CloseSecondaryIndex(index_info);
     HT_CloseFile(info);
+    //HT_HashStatistics(FILE_NAME); //??
     SHT_HashStatistics(INDEX_NAME);
     BF_Close();
 }
