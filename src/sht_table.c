@@ -194,8 +194,10 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
   {
     for(int i=0; i<block_info.numOfRecords; i++) //check if the record already exists in this block of the bucket
     {
-      if(strcmp(sht_rec[i].name, current_record.name) == 0 && sht_rec[i].blockID == current_record.blockID)
+      if(strcmp(sht_rec[i].name, current_record.name) == 0 && sht_rec[i].blockID == current_record.blockID){
+        printf("The (secondary) record (%s , %d) already exists!\n", current_record.name, current_record.blockID);
         return 0; //return because the secondary record already exist
+      }
     }
 
     blockId=block_info.nextBlockId; 
@@ -208,9 +210,10 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
 
   for(int i=0; i<block_info.numOfRecords; i++) //check if the record already exists in the last block of the bucket
   {
-    if(strcmp(sht_rec[i].name, current_record.name) == 0 && sht_rec[i].blockID == current_record.blockID)
-      return 0;
-      //return because the secondary record already exist
+    if(strcmp(sht_rec[i].name, current_record.name) == 0 && sht_rec[i].blockID == current_record.blockID){
+      printf("The (secondary) record (%s , %d) already exists!\n", current_record.name, current_record.blockID);
+      return 0; //return because the secondary record already exist
+    }
   }
 
   //if the block has empty space then write the record at the block
@@ -380,7 +383,7 @@ int SHT_HashStatistics(char* filename /*όνομα του αρχείου που 
       recordsOfBuckets[i]+=block_info->numOfRecords; //get the number of records for the specific block
       blocksOfBuckets[i]++; //increase the blocks that the bucket has by one
       current_block = block_info->nextBlockId; //go to the next block
-
+      printf("current_block %d\n",current_block);
       BF_UnpinBlock(block);
     }
   }
