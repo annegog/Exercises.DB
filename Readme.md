@@ -1,6 +1,6 @@
 ### Κ18 - Database Systems Implementation - Exercise 1, 2
 
-Atalanti Papadaki - Annna Gogoula
+Atalanti Papadaki - Anna Gogoula
 
 This exercise aims to provide an understanding of how Database Systems manage data at the block and record levels. It also explores the impact of indexing on the performance of a Database Management System (DBMS). In this exercise, you will implement functions for managing files using two different methods: heap file organization and static hashing.
 
