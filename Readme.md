@@ -2,16 +2,18 @@
 
 Atalanti Papadaki - Annna Gogoula
 
+This exercise aims to provide an understanding of how Database Systems manage data at the block and record levels. It also explores the impact of indexing on the performance of a Database Management System (DBMS). In this exercise, you will implement functions for managing files using two different methods: heap file organization and static hashing.
+
 ----------------------------------------------------------------
 
 - make bf:
-    ./build/bf_main
+    * ./build/bf_main
 
 - make ht:
-    ./build/ht_main
+    * ./build/ht_main
 
 - make sht:
-    ./build/sht_main
+    * ./build/sht_main
 
 ----------------------------------------------------------------
 -> HP
@@ -23,9 +25,9 @@ Atalanti Papadaki - Annna Gogoula
  - hp_file.c:
     * we made 2 defines. The one returns null and the other -1, if the BF function is executed incorrectly.
     * HP_CreateFile: Create a file with fileName name, create a block and create and initialize the metadata, then copy them on the first block of the file.
-    * HP_OpenFile: Get the first block and check if it's heap type, if it's not returns null.
+    * HP_OpenFile: Get the first block and check if it's heap type, if it's not return null.
     * HP_CloseFile: 
-    * HP_InsertEntry: Check if the last block ID is 0 (the first block of the file), make a new block and place the record in the file
+    * HP_InsertEntry: Check if the last block ID is 0 (the first block of the file), make a new block place the record in the file,
                   and update the metadata of the block. If it's not get the last block and if there is space in it place the record there and update the metadata.
                   If the block is full, make a new block and place the record there with the metadata of the block.
     * HP_GetAllEntries: take the number of blocks and for every block and every record of it, check if the request ID is the same as the records. If yes print the record.
@@ -35,8 +37,8 @@ Atalanti Papadaki - Annna Gogoula
 -> HT
  - ht_table.h:
     * struct HT_info: is a struct for the data of the file it also contains the file type, file descriptor, the capacity of the records, the number of the buckets we are 
-                     going to use, a hash table, the number of the occupied positions in a hash table, the size of it and the ID of the last block.
-    * struct HT_block_info: it contains the number of the records in every block, the ID of the next block and the ID of the previous block.
+                     going to use, a hash table, the number of the occupied positions in a hash table, the size of it, and the ID of the last block.
+    * struct HT_block_info: it contains the number of the records in every block, the ID of the next block, and the ID of the previous block.
  - ht_table.c:
     * HT_CreateFile: Create a file with fileName name, create a block and initialize the metadata of the file.
     * HT_OpenFile: Make space for the hash table, open the first block and check the file type.
@@ -53,7 +55,7 @@ Atalanti Papadaki - Annna Gogoula
     * struct SHT_info: is a struct for the data of the file it also contains the file type, the file name of the primary index, the file descriptor, the capacity of the records, 
                      the number of the buckets we are going to use, a hash table and the ID of the last block.
     * struct SHT_block_info: it contains the number of the records in every block, the ID of the next block and the ID of the previous block.
-    * struct SHT_record: it contains the name (of the ht record) and the block id of the block.
+    * struct SHT_record: it contains the name (of the ht record) and the block ID of the block.
  - sht_table.c:
     * SHT_CreateSecondaryIndex: Create a file with fileName name, create a block and initialize the metadata of the file.
     * SHT_OpenSecondaryIndex: Make space for the secondary hash table, open the first block and check the file type.
