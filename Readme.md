@@ -1,18 +1,20 @@
-Κ18 - Database Systems Implementation - Exercise 1, 2
-Atalanti Papadaki - Anna Gogoula
-----------------------------------------------------------------
+### Κ18 - Database Systems Implementation - Exercise 1, 2
 
-- make bf
-./build/bf_main
-
-- make ht
-./build/ht_main
-
-- make sht
-./build/sht_main
+Atalanti Papadaki - Annna Gogoula
 
 ----------------------------------------------------------------
-- HP
+
+- make bf:
+    ./build/bf_main
+
+- make ht:
+    ./build/ht_main
+
+- make sht:
+    ./build/sht_main
+
+----------------------------------------------------------------
+-> HP
  - hp_file.h:
     * stuct HP_info: is a struct for the data of the file, it contains the file type, file descriptor,
                   the id of the last block and the capacity of the block.
@@ -30,7 +32,7 @@ Atalanti Papadaki - Anna Gogoula
  - hp_main: RECORDS_NUM = 594, is the maximum we can make without segmentation fault. :(
 
 
-- HT
+-> HT
  - ht_table.h:
     * struct HT_info: is a struct for the data of the file it also contains the file type, file descriptor, the capacity of the records, the number of the buckets we are 
                      going to use, a hash table, the number of the occupied positions in a hash table, the size of it and the ID of the last block.
@@ -46,7 +48,7 @@ Atalanti Papadaki - Anna Gogoula
                   If you find it print it and when the searching stops return the number of the blocks that you read.
 
 
-- SHT
+-> SHT
  - sht_table.h:
     * struct SHT_info: is a struct for the data of the file it also contains the file type, the file name of the primary index, the file descriptor, the capacity of the records, 
                      the number of the buckets we are going to use, a hash table and the ID of the last block.
@@ -63,7 +65,7 @@ Atalanti Papadaki - Anna Gogoula
                               And for every record in that block id, if you find the name print the record. Return the number of blocks (ht blocks + sht blocks).
 
 
-- HashStatistics(HT and SHT): Open the file, if the file is not the file type you want return -1. Else for every bucket in the file, find every block that the bucket has and get the number of 
+-> HashStatistics(HT and SHT): Open the file, if the file is not the file type you want return -1. Else for every bucket in the file, find every block that the bucket has and get the number of 
                            records for the specific block and increase the blocks that the bucket has by one. Find the bucket with the minimum and the maximum records. Find the overflowed blocks and print them.
 
 
